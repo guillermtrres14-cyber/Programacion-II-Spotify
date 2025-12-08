@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Spotify ML Dashboard 2024</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="page">
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo">
+            <div class="logo-icon">ML</div>
+            <div>
+                <div class="logo-text-main">Spotify ML Dashboard</div>
+                <div class="logo-text-sub">Proyecto de Machine Learning – 2024</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <a href="{{ url_for('vista_dataset') }}">Dataset</a>
+            <a href="#" class="nav-pill">Demo local</a>
+        </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-text">
+            <div class="eyebrow">
+                <span></span>
+                <div>Análisis global de streaming en Spotify</div>
+            </div>
+
+            <h1 class="hero-title">
+                Predice y agrupa <span class="hero-highlight">streams</span>
+                con modelos de Machine Learning.
+            </h1>
+
+            <p class="hero-subtitle">
+                Esta aplicación ejecuta modelos de <strong>Regresión Lineal</strong>,
+                <strong>Árbol de Decisión</strong> y <strong>K-means</strong> sobre el dataset
+                <strong>Spotify 2024 Global Streaming</strong> para analizar el comportamiento
+                de reproducción en diferentes países y artistas.
+            </p>
+
+            <div class="hero-actions">
+                <a href="{{ url_for('vista_regresion') }}" class="btn btn-primary">
+                    Ejecutar Regresión de Streams
+                </a>
+                <a href="{{ url_for('vista_dataset') }}" class="btn btn-ghost">
+                    Ver muestra del dataset
+                </a>
+            </div>
+
+            <div class="hero-meta">
+                {% if metrics is defined and metrics %}
+                    Modelo seleccionado: <strong>{{ selected_model }}</strong>
+                {% else %}
+                    Selecciona uno de los modelos para ver sus métricas en tiempo real.
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PANEL MÉTRICAS -->
+        <aside class="hero-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">
+                        {% if selected_model %}
+                            Resultados – {{ selected_model }}
+                        {% else %}
+                            Resultados del modelo
+                        {% endif %}
+                    </div>
+                    <div class="panel-subtitle">
+                        {% if metrics is defined and metrics %}
+                            {{ metrics.tipo }}
+                        {% else %}
+                            Aún no has ejecutado ningún modelo.
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="panel-chip">Spotify 2024</div>
+            </div>
+
+            {% if metrics is defined and metrics %}
+                <div class="metrics-grid">
+                    {% if metrics.MAE is defined %}
+                    <div>
+                        <div class="metric-label">MAE</div>
+                        <div class="metric-value">{{ metrics.MAE }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.MSE is defined %}
+                    <div>
+                        <div class="metric-label">MSE</div>
+                        <div class="metric-value">{{ metrics.MSE }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.RMSE is defined %}
+                    <div>
+                        <div class="metric-label">RMSE</div>
+                        <div class="metric-value">{{ metrics.RMSE }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.R2 is defined %}
+                    <div>
+                        <div class="metric-label">R²</div>
+                        <div class="metric-value">{{ metrics.R2 }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.n_clusters is defined %}
+                    <div>
+                        <div class="metric-label">Clusters (K-means)</div>
+                        <div class="metric-value">{{ metrics.n_clusters }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.inercia is defined %}
+                    <div>
+                        <div class="metric-label">Inercia</div>
+                        <div class="metric-value">{{ metrics.inercia }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% set clusters = metrics.get('tamaño_clusters') if metrics.get is not none else None %}
+                {% if clusters %}
+                    <div class="panel-footer">
+                        Distribución de clusters:
+                        <div class="clusters">
+                            {% for cid, size in clusters.items() %}
+                                <div>Cluster {{ cid }} → <span>{{ size }} canciones</span></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% elif metrics.columna_objetivo is defined %}
+                    <div class="panel-footer">
+                        Modelo entrenado para predecir <span>{{ metrics.columna_objetivo }}</span>.
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="panel-footer">
+                    Ejecuta cualquiera de los modelos de la parte inferior para visualizar
+                    aquí sus métricas principales (MAE, MSE, RMSE, R² o inercia de K-means).
+                </div>
+            {% endif %}
+        </aside>
+    </section>
+
+    <!-- CARDS DE MODELOS -->
+    <section class="cards">
+        <article class="card">
+            <div class="card-title">Regresión Lineal</div>
+            <div class="card-tag">Predicción de streams</div>
+            <p class="card-text">
+                Estima el valor de <strong>Total Streams (Millions)</strong> usando variables
+                numéricas como oyentes mensuales, horas reproducidas y duración media.
+            </p>
+            <a href="{{ url_for('vista_regresion') }}" class="btn btn-primary">Ver modelo</a>
+        </article>
+
+        <article class="card">
+            <div class="card-title">Árbol de Decisión</div>
+            <div class="card-tag">Modelo interpretable</div>
+            <p class="card-text">
+                Permite entender qué factores del streaming influyen más en el volumen
+                de reproducciones totales por artista o país.
+            </p>
+            <a href="{{ url_for('vista_arbol') }}" class="btn btn-primary">Ver modelo</a>
+        </article>
+
+        <article class="card">
+            <div class="card-title">K-means Clustering</div>
+            <div class="card-tag">Segmentación de patrones</div>
+            <p class="card-text">
+                Agrupa canciones o artistas en <strong>clusters</strong> según su comportamiento
+                de escucha, oyentes mensuales y tasa de saltos (skips).
+            </p>
+            <a href="{{ url_for('vista_kmeans') }}" class="btn btn-primary">Ver clusters</a>
+        </article>
+
+        <article class="card">
+            <div class="card-title">Explorar Dataset</div>
+            <div class="card-tag">Spotify 2024 Global</div>
+            <p class="card-text">
+                Consulta una muestra de las filas originales del dataset: país, artista,
+                género, oyentes mensuales y métricas agregadas de streaming.
+            </p>
+            <a href="{{ url_for('vista_dataset') }}" class="btn btn-primary">Ver datos</a>
+        </article>
+    </section>
+</div>
+</body>
+</html>
