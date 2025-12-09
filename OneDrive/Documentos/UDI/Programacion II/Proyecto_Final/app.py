@@ -84,12 +84,86 @@ STOPWORDS = cargar_stopwords()
 def generar_graficas_regresion():
     df = cargar_spotify()
 
+    # ====== Features base para el modelo ======
+    # X: oyentes mensuales, y: streams totales
     X = df[[COL_X1]]
     y = df[COL_Y]
+
+    # Feature derivada para "intensidad de escucha"
+    df["Streams per Listener"] = df[COL_Y] / df[COL_X1]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
+
+    modelo = LinearRegression()
+    modelo.fit(X_train, y_train)
+    y_pred = modelo.predict(X_test)
+
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    imagenes = {}
+
+    # 1) Oyentes mensuales vs Streams (scatter simple)
+    fig_a, ax_a = plt.subplots(figsize=(6, 4))
+    ax_a.scatter(df[COL_X1], df[COL_Y], alpha=0.5)
+    ax_a.set_xlabel("Oyentes mensuales (Monthly Listeners)")
+    ax_a.set_ylabel("Streams totales")
+    ax_a.set_title("Oyentes mensuales vs Streams")
+    imagenes["scatter_listeners"] = fig_to_base64(fig_a)
+    plt.close(fig_a)
+
+    # 2) Intensidad de escucha vs Streams (Streams per Listener)
+    fig_b, ax_b = plt.subplots(figsize=(6, 4))
+    ax_b.scatter(df["Streams per Listener"], df[COL_Y], alpha=0.5)
+    ax_b.set_xlabel("Streams per Listener (intensidad de escucha)")
+    ax_b.set_ylabel("Streams totales")
+    ax_b.set_title("Intensidad de escucha vs Streams")
+    imagenes["scatter_intensidad"] = fig_to_base64(fig_b)
+    plt.close(fig_b)
+
+    # 3) Scatter + recta de regresión (sobre el conjunto de prueba)
+    fig1, ax1 = plt.subplots(figsize=(6, 4))
+    ax1.scatter(X_test[COL_X1], y_test, alpha=0.5, label="Real")
+    ax1.plot(X_test[COL_X1], y_pred, color="red", linewidth=2, label="Predicción")
+    ax1.set_xlabel(COL_X1)
+    ax1.set_ylabel(COL_Y)
+    ax1.set_title(f"{COL_Y} vs {COL_X1} (Regresión)")
+    ax1.legend()
+    imagenes["modelo"] = fig_to_base64(fig1)
+    plt.close(fig1)
+
+    # 4) Real vs Predicho
+    fig2, ax2 = plt.subplots(figsize=(6, 4))
+    ax2.scatter(y_test, y_pred, alpha=0.5)
+    min_val = min(y_test.min(), y_pred.min())
+    max_val = max(y_test.max(), y_pred.max())
+    ax2.plot([min_val, max_val], [min_val, max_val], linestyle="--")
+    ax2.set_xlabel("Real")
+    ax2.set_ylabel("Predicho")
+    ax2.set_title("Real vs Predicho – Regresión Lineal")
+    imagenes["real_vs_pred"] = fig_to_base64(fig2)
+    plt.close(fig2)
+
+    # 5) Histograma de residuos
+    residuos = y_test - y_pred
+    fig3, ax3 = plt.subplots(figsize=(6, 4))
+    ax3.hist(residuos, bins=30)
+    ax3.set_title("Distribución de residuos")
+    ax3.set_xlabel("Error (real - predicho)")
+    ax3.set_ylabel("Frecuencia")
+    imagenes["residuos"] = fig_to_base64(fig3)
+    plt.close(fig3)
+
+    metricas = {
+        "mse": round(mse, 3),
+        "mae": round(mae, 3),
+        "r2":  round(r2, 4),
+    }
+
+    return imagenes, metricas
 
     modelo = LinearRegression()
     modelo.fit(X_train, y_train)
