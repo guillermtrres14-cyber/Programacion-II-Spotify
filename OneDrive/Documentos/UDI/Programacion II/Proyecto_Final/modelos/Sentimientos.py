@@ -1,165 +1,159 @@
-import re
+import os
 from collections import Counter
-from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from textblob import TextBlob
 from wordcloud import WordCloud
 
-# Carpeta donde se guardan las imágenes
-IMG_DIR = Path("static/images")
-IMG_DIR.mkdir(parents=True, exist_ok=True)
-
 
 def _detectar_columna_texto(df: pd.DataFrame) -> str:
     """
-    Devuelve el nombre de la columna que contiene el texto de la reseña.
-    Acepta varios nombres comunes.
+    Intenta encontrar la columna de texto:
+    - 'review', 'text' o 'comment'
+    - si no, la primera columna de tipo object (string).
     """
-    posibles = ["review", "content", "text", "comment", "comments"]
-    for col in posibles:
+    for col in ["review", "text", "comment"]:
         if col in df.columns:
             return col
-    raise ValueError(
-        "El CSV debe tener una columna de texto llamada "
-        "'review', 'content' o similar."
+
+    obj_cols = df.select_dtypes(include="object").columns
+    if len(obj_cols) == 0:
+        raise ValueError(
+            "El CSV no tiene ninguna columna de texto (por ejemplo 'review')."
+        )
+    return obj_cols[0]
+
+
+def _clasificar_polaridad(p: float) -> str:
+    """Convierte polaridad numérica en categoría de sentimiento."""
+    if p > 0.05:
+        return "Positivo"
+    elif p < -0.05:
+        return "Negativo"
+    else:
+        return "Neutral"
+
+
+def run_sentimiento(csv_path: str):
+    """
+    Ejecuta el análisis de sentimiento y genera las gráficas necesarias.
+    Devuelve un diccionario con las rutas (relativas a /static) de las imágenes.
+    """
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception as e:
+        return {"ok": False, "error": f"No se pudo leer el CSV: {e}"}
+
+    try:
+        text_col = _detectar_columna_texto(df)
+    except ValueError as e:
+        # Mensaje que veías en pantalla
+        return {"ok": False, "error": str(e)}
+
+    # --- Preprocesado de texto ------------------------------------------------
+    df[text_col] = df[text_col].astype(str).fillna("")
+
+    # Polaridad con TextBlob
+    df["polarity"] = df[text_col].apply(lambda t: TextBlob(t).sentiment.polarity)
+
+    # Categorías de sentimiento
+    df["sentiment"] = df["polarity"].apply(_clasificar_polaridad)
+
+    # Conteos y promedio
+    order = ["Positivo", "Neutral", "Negativo"]
+    sentiment_counts = (
+        df["sentiment"].value_counts().reindex(order).fillna(0).astype(int)
+    )
+    mean_score = (
+        df.groupby("sentiment")["polarity"].mean().reindex(order).fillna(0.0)
     )
 
+    # Carpeta de salida
+    img_dir = os.path.join("static", "images")
+    os.makedirs(img_dir, exist_ok=True)
 
-def run_sentimiento(csv_path: str) -> dict:
-    try:
-        # Leer CSV
-        df = pd.read_csv(csv_path, encoding="utf-8")
+    # ==== 1) PIE: Distribución de sentimientos ================================
+    plt.style.use("dark_background")
+    colors = ["#1ED760", "#FFFFFF", "#FF4B4B"]  # verde, blanco, rojo
 
-        # === 1. Elegir la columna correcta de texto ===
-        col_texto = _detectar_columna_texto(df)
-        df["clean"] = df[col_texto].astype(str)
+    plt.figure(figsize=(5, 5))
+    sentiment_counts.plot(
+        kind="pie",
+        autopct="%1.1f%%",
+        colors=colors,
+        startangle=90,
+        textprops={"fontsize": 11},
+    )
+    plt.title("Distribución de sentimientos")
+    plt.ylabel("")
+    pie_path = os.path.join(img_dir, "sentiment_pie.png")
+    plt.tight_layout()
+    plt.savefig(pie_path, dpi=120)
+    plt.close()
 
-        # Si todo está vacío, mejor avisar
-        if df["clean"].str.strip().eq("").all():
-            return {
-                "ok": False,
-                "error": "No hay texto válido en la columna de reseñas.",
-            }
+    # ==== 2) BARRAS: Score promedio por sentimiento ===========================
+    plt.figure(figsize=(6, 4))
+    bars = mean_score.plot(kind="bar", color=colors)
+    plt.title("Score promedio por sentimiento (polarity)")
+    plt.xlabel("Sentimiento")
+    plt.ylabel("Polarity promedio")
 
-        # === 2. Calcular polaridad y etiqueta de sentimiento ===
-        df["polarity"] = df["clean"].apply(
-            lambda x: TextBlob(x).sentiment.polarity
+    # Etiquetas numéricas encima de cada barra
+    for patch, value in zip(bars.patches, mean_score.values):
+        bars.annotate(
+            f"{value:.2f}",
+            (patch.get_x() + patch.get_width() / 2.0, value),
+            ha="center",
+            va="bottom",
+            fontsize=10,
         )
 
-        # Umbrales un poco más amplios para evitar que todo sea neutral
-        def clasificar(p):
-            if p > 0.1:
-                return "positivo"
-            elif p < -0.1:
-                return "negativo"
-            else:
-                return "neutral"
+    bar_score_path = os.path.join(img_dir, "sentiment_score.png")
+    plt.tight_layout()
+    plt.savefig(bar_score_path, dpi=120)
+    plt.close()
 
-        df["sentiment"] = df["polarity"].apply(clasificar)
+    # ==== 3) Nube de palabras ================================================
+    text = " ".join(df[text_col])
+    wc = WordCloud(
+        width=800,
+        height=400,
+        background_color="black",
+        colormap="viridis"
+    ).generate(text)
+    wc_path = os.path.join(img_dir, "sentiment_wordcloud.png")
+    wc.to_file(wc_path)
 
-        conteo = (
-            df["sentiment"]
-            .value_counts()
-            .reindex(["positivo", "neutral", "negativo"], fill_value=0)
-        )
+    # ==== 4) Top palabras =====================================================
+    words = [w.lower() for w in text.split() if len(w) > 3]
+    freq = Counter(words)
+    top_words = freq.most_common(10)
 
-        # === 3. Gráfico de pastel (distribución de sentimientos) ===
-        plt.figure(figsize=(5, 5))
-        colors = ["#1ED760", "#F1F1F1", "#FF4F4F"]  # verde, gris, rojo
-        conteo.plot(
-            kind="pie",
-            autopct="%1.1f%%",
-            startangle=90,
-            colors=colors,
-        )
-        plt.title("Distribución de Sentimientos")
-        plt.ylabel("")
-        pie_path = IMG_DIR / "sentiment_pie.png"
-        plt.savefig(pie_path, bbox_inches="tight", facecolor="black")
-        plt.close()
+    labels, values = zip(*top_words) if top_words else ([], [])
 
-        # === 4. Barra: score promedio por tipo de sentimiento ===
-        mean_scores = (
-            df.groupby("sentiment")["polarity"]
-            .mean()
-            .reindex(["positivo", "neutral", "negativo"])
-        )
+    plt.figure(figsize=(8, 4))
+    plt.barh(range(len(values)), values)
+    plt.yticks(range(len(labels)), labels)
+    plt.xlabel("Frecuencia")
+    plt.title("Palabras más mencionadas")
+    plt.tight_layout()
+    top_words_path = os.path.join(img_dir, "sentiment_top_words.png")
+    plt.savefig(top_words_path, dpi=120)
+    plt.close()
 
-        plt.figure(figsize=(5, 4))
-        mean_scores.plot(kind="bar")
-        plt.title("Score promedio por sentimiento")
-        plt.xticks(rotation=0)
-        bar_path = IMG_DIR / "sentiment_bar.png"
-        plt.savefig(bar_path, bbox_inches="tight", facecolor="black")
-        plt.close()
-
-        # === 5. Nube de palabras y palabras más usadas ===
-        # Unimos todo el texto
-        texto_total = " ".join(df["clean"])
-
-        # Solo palabras alfabéticas (evitamos IDs tipo '4d89', números, etc.)
-        tokens = re.findall(r"[A-Za-zÁÉÍÓÚáéíóúÑñü']{3,}", texto_total.lower())
-
-        # Stopwords sencillas EN + ES para limpiar
-        stopwords = {
-            "the", "and", "for", "this", "that", "with", "you", "your",
-            "are", "was", "but", "not", "very", "have", "has", "had",
-            "los", "las", "unos", "unas", "muy", "pero", "para", "por",
-            "con", "sin", "que", "como", "cuando", "donde", "sobre",
-        }
-        tokens = [t for t in tokens if t not in stopwords]
-
-        # Nube de palabras
-        if tokens:
-            wc = WordCloud(
-                width=900,
-                height=400,
-                background_color="black",
-                colormap="viridis",
-            ).generate(" ".join(tokens))
-            wc_path = IMG_DIR / "sentiment_wordcloud.png"
-            wc.to_file(wc_path)
-        else:
-            wc_path = IMG_DIR / "sentiment_wordcloud.png"
-            # Nube vacía (por si acaso)
-            WordCloud(width=900, height=400, background_color="black").to_file(
-                wc_path
-            )
-
-        # Top 15 palabras más frecuentes
-        freq = Counter(tokens)
-        top = freq.most_common(15)
-        palabras, frecuencias = zip(*top) if top else ([], [])
-
-        plt.figure(figsize=(8, 4))
-        plt.barh(range(len(palabras)), frecuencias)
-        plt.yticks(range(len(palabras)), palabras)
-        plt.gca().invert_yaxis()
-        plt.title("Palabras más usadas")
-        top_words_path = IMG_DIR / "sentiment_top_words.png"
-        plt.savefig(top_words_path, bbox_inches="tight", facecolor="black")
-        plt.close()
-
-        return {
-            "ok": True,
-            "tipo": "Análisis de Sentimiento – Reseñas Spotify",
-            "images": {
-                # Lo que usarás en index.html: url_for('static', filename=...)
-                "pie": "images/" + pie_path.name,
-                "bar": "images/" + bar_path.name,
-                "wc": "images/" + wc_path.name,
-                "top_words": "images/" + top_words_path.name,
-            },
-            "resumen": {
-                "total": int(len(df)),
-                "positivos": int(conteo["positivo"]),
-                "neutros": int(conteo["neutral"]),
-                "negativos": int(conteo["negativo"]),
-            },
-        }
-
-    except Exception as e:
-        # Cualquier error se devuelve al template para mostrar el mensaje
-        return {"ok": False, "error": str(e)}
+    # Diccionario de salida compatible con index.html
+    return {
+        "ok": True,
+        "images": {
+            "pie": "images/" + os.path.basename(pie_path),
+            "bar": "images/" + os.path.basename(bar_score_path),
+            "wc": "images/" + os.path.basename(wc_path),
+            "top_words": "images/" + os.path.basename(top_words_path),
+        },
+        "summary": {
+            "total_reviews": int(len(df)),
+            "sentiment_counts": sentiment_counts.to_dict(),
+            "mean_score": {k: float(v) for k, v in mean_score.items()},
+        },
+    }
