@@ -64,7 +64,6 @@ def cargar_stopwords():
 
 STOPWORDS = cargar_stopwords()
 
-
 def df_spotify():
     """Carga el dataset principal de Spotify."""
     return pd.read_csv(RUTA_DATA_SPOTIFY)
