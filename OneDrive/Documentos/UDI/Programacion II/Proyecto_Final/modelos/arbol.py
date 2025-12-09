@@ -1,108 +1,74 @@
-import os
-import numpy as np
-import pandas as pd
-
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-STATIC_IMG_DIR = os.path.join(BASE_DIR, "static", "img")
-os.makedirs(STATIC_IMG_DIR, exist_ok=True)
+from sklearn.tree import DecisionTreeRegressor, plot_tree
 
 
-def run_arbol(data_path=None):
-    try:
-        if data_path is None:
-            data_path = os.path.join(DATA_DIR, "Spotify_2024_Global_Streaming_Data.csv")
+def generar_graficas_arbol():
+    df_clean, numeric_cols, feature_cols = cargar_spotify_limpio()
 
-        if not os.path.exists(data_path):
-            raise FileNotFoundError(f"No se encontró el dataset en: {data_path}")
+    X = df_clean[feature_cols]
+    y = df_clean[TARGET_COL]
 
-        df = pd.read_csv(data_path)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-        numeric_df = df.select_dtypes(include="number").dropna()
+    tree_reg = DecisionTreeRegressor(max_depth=6, random_state=42)
+    tree_reg.fit(X_train, y_train)
 
-        target_col = "Total Streams (Millions)"
-        if target_col not in numeric_df.columns:
-            raise ValueError(f"No existe la columna '{target_col}' en el dataset.")
+    y_pred_tree = tree_reg.predict(X_test)
 
-        X = numeric_df.drop(columns=[target_col])
-        y = numeric_df[target_col]
-        feature_names = X.columns.tolist()
+    mse_tree = mean_squared_error(y_test, y_pred_tree)
+    mae_tree = mean_absolute_error(y_test, y_pred_tree)
+    r2_tree = r2_score(y_test, y_pred_tree)
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42
-        )
+    imagenes = {}
 
-        model = DecisionTreeRegressor(max_depth=6, random_state=42)
-        model.fit(X_train, y_train)
+    # --- Gráfico A: Real vs Predicho – Árbol de decisión ---
+    fig_a, ax_a = plt.subplots(figsize=(6, 5))
+    ax_a.scatter(y_test, y_pred_tree, alpha=0.5, label="Predicciones")
+    min_val = min(y_test.min(), y_pred_tree.min())
+    max_val = max(y_test.max(), y_pred_tree.max())
+    ax_a.plot([min_val, max_val], [min_val, max_val], linestyle="--", label="Línea ideal")
+    ax_a.set_xlabel(f"Valor real ({TARGET_COL})")
+    ax_a.set_ylabel(f"Predicción ({TARGET_COL})")
+    ax_a.set_title("Real vs Predicho – Árbol de Decisión")
+    ax_a.legend()
+    imagenes["real_vs_pred"] = fig_to_base64(fig_a)
+    plt.close(fig_a)
 
-        y_pred = model.predict(X_test)
+    # --- Gráfico B: Estructura del árbol (primeros niveles) ---
+    fig_b, ax_b = plt.subplots(figsize=(18, 8))
+    plot_tree(
+        tree_reg,
+        feature_names=feature_cols,
+        filled=True,
+        max_depth=3,
+        rounded=True,
+        ax=ax_b,
+    )
+    ax_b.set_title("Estructura del Árbol de Decisión (primeros niveles)")
+    imagenes["arbol"] = fig_to_base64(fig_b)
+    plt.close(fig_b)
 
-        mse = mean_squared_error(y_test, y_pred)
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-        rmse = np.sqrt(mse)
+    # --- Gráfico C: Importancia de variables ---
+    importances = tree_reg.feature_importances_
+    imp_df = pd.DataFrame({"feature": feature_cols, "importance": importances}).sort_values(
+        "importance", ascending=False
+    )
 
-        # ==== Gráfico 1: Real vs Predicho ====
-        plt.figure(figsize=(7, 5))
-        plt.scatter(y_test, y_pred, alpha=0.4)
-        min_v, max_v = min(y_test.min(), y_pred.min()), max(y_test.max(), y_pred.max())
-        plt.plot([min_v, max_v], [min_v, max_v], "r--", label="Línea ideal")
-        plt.xlabel("Streams reales (Millions)")
-        plt.ylabel("Streams predichos (Millions)")
-        plt.title("Árbol de Decisión – Real vs Predicho")
-        plt.legend()
-        img_real_pred = os.path.join(STATIC_IMG_DIR, "arbol_real_vs_pred.png")
-        plt.savefig(img_real_pred, dpi=120)
-        plt.close()
+    fig_c, ax_c = plt.subplots(figsize=(8, 5))
+    ax_c.bar(imp_df["feature"], imp_df["importance"])
+    ax_c.set_xticklabels(imp_df["feature"], rotation=90)
+    ax_c.set_title("Importancia de variables – Árbol de Decisión")
+    fig_c.tight_layout()
+    imagenes["importancias"] = fig_to_base64(fig_c)
+    plt.close(fig_c)
 
-        # ==== Importancia de variables ====
-        importances = model.feature_importances_
-        idx_sorted = np.argsort(importances)[::-1][:10]
-        top_features = [feature_names[i] for i in idx_sorted]
-        top_importances = importances[idx_sorted]
+    metricas = {
+        "mse": round(mse_tree, 3),
+        "mae": round(mae_tree, 3),
+        "r2": round(r2_tree, 4),
+        "profundidad": tree_reg.get_depth(),
+        "n_nodos": tree_reg.tree_.node_count,
+    }
 
-        plt.figure(figsize=(8, 5))
-        plt.barh(top_features[::-1], top_importances[::-1])
-        plt.xlabel("Importancia")
-        plt.title("Árbol de Decisión – Importancia de Variables")
-        img_importancia = os.path.join(STATIC_IMG_DIR, "arbol_importancia.png")
-        plt.tight_layout()
-        plt.savefig(img_importancia, dpi=120)
-        plt.close()
-
-        importancia_vars = [
-            {"variable": f, "importancia": float(imp)}
-            for f, imp in zip(top_features, top_importances)
-        ]
-
-        return {
-            "ok": True,
-            "tipo": "Árbol de Decisión",
-            "columna_objetivo": target_col,
-            "MAE": round(float(mae), 3),
-            "MSE": round(float(mse), 3),
-            "RMSE": round(float(rmse), 3),
-            "R2": round(float(r2), 3),
-            "Importancia_Variables": importancia_vars,
-            "images": {
-                "real_vs_pred": "img/arbol_real_vs_pred.png",
-                "importancia": "img/arbol_importancia.png"
-            }
-        }
-
-    except Exception as e:
-        return {
-            "ok": False,
-            "tipo": "Árbol de Decisión",
-            "error": str(e),
-            "Importancia_Variables": [],
-            "images": {}
-        }
+    return imagenes, metricas, None

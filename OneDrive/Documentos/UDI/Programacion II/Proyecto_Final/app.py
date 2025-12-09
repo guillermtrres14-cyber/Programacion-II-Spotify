@@ -427,12 +427,7 @@ def vista_regresion():
 @app.route("/arbol")
 def vista_arbol():
     imagenes, metricas, error = generar_graficas_arbol()
-    return render_template(
-        "arbol.html",
-        imagenes=imagenes,
-        metricas=metricas,
-        error=error,
-    )
+    return render_template("arbol.html", imagenes=imagenes, metricas=metricas, error=error)
 
 
 @app.route("/kmeans")
