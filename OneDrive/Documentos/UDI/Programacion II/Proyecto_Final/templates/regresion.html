@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Regresión Lineal · Spotify ML{% endblock %}
+{% block top_title %}Regresión Lineal – Predicción de Streams{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <h2>Resultados del modelo de Regresión Lineal</h2>
+    <p>Modelo entrenado sobre el dataset Spotify 2024 Global Streaming.</p>
+</section>
+
+{% if results and results.ok %}
+<section class="metrics-row">
+    <div class="metric-card">
+        <span class="metric-label">R²</span>
+        <span class="metric-value">{{ results.r2 }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">MSE</span>
+        <span class="metric-value">{{ results.mse }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">MAE</span>
+        <span class="metric-value">{{ results.mae }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Mejor predictor</span>
+        <span class="metric-value">{{ results.best_feature }}</span>
+    </div>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <h3>Relación {{ results.best_feature }} vs {{ results.target }}</h3>
+        <p class="chart-description">Datos reales vs línea de regresión ajustada.</p>
+        <img src="{{ url_for('static', filename=results.images.scatter) }}"
+             alt="Scatter regresión"
+             class="chart-image">
+    </article>
+
+    <article class="chart-card">
+        <h3>Importancia de variables</h3>
+        <p class="chart-description">
+            Peso relativo de cada variable en la predicción de {{ results.target }}.
+        </p>
+        <img src="{{ url_for('static', filename=results.images.importancia) }}"
+             alt="Importancia de variables"
+             class="chart-image">
+    </article>
+</section>
+{% else %}
+<p class="error-text">
+    No se pudieron calcular las métricas de regresión.
+    {% if results and results.error %} {{ results.error }}{% endif %}
+</p>
+{% endif %}
+{% endblock %}
