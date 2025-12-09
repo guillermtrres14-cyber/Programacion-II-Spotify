@@ -77,11 +77,95 @@ def fig_to_base64(fig):
 
 
 # ------------------------- REGRESIÓN LINEAL ------------------------- #
+def generar_graficas_regresion():
+    """
+    Dashboard de Regresión Lineal:
+      - scatter + recta de regresión
+      - histograma de residuos
+      - real vs predicción
+    """
+    try:
+        df = df_spotify()
+    except Exception:
+        return None, None, "No se pudo leer el dataset de Spotify."
 
+    if COLUMNA_FEATURE_X not in df.columns or COLUMNA_STREAMS not in df.columns:
+        cols = ", ".join(df.columns)
+        return None, None, f"Revisa nombres de columnas. Columnas actuales: {cols}"
+
+    X = df[[COLUMNA_FEATURE_X]]
+    y = df[COLUMNA_STREAMS]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    modelo = LinearRegression()
+    modelo.fit(X_train, y_train)
+
+    y_pred = modelo.predict(X_test)
+
+    from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+    r2 = r2_score(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    rmse = mean_squared_error(y_test, y_pred, squared=False)
+
+    imagenes = {}
+
+    # 1) Scatter + recta
+    fig1, ax1 = plt.subplots(figsize=(6, 4))
+    ax1.scatter(X_test, y_test, alpha=0.5, label="Real")
+    ax1.plot(X_test, y_pred, color="red", linewidth=2, label="Predicción")
+    ax1.set_xlabel(COLUMNA_FEATURE_X)
+    ax1.set_ylabel("streams")
+    ax1.set_title("Streams vs " + COLUMNA_FEATURE_X)
+    ax1.legend()
+    imagenes["modelo"] = fig_to_base64(fig1)
+    plt.close(fig1)
+
+    # 2) Histograma de residuos
+    residuos = y_test - y_pred
+    fig2, ax2 = plt.subplots(figsize=(6, 4))
+    ax2.hist(residuos, bins=30, color="#3498db", alpha=0.8)
+    ax2.set_title("Distribución de residuos")
+    ax2.set_xlabel("Residuo (real - predicho)")
+    ax2.set_ylabel("Frecuencia")
+    imagenes["residuos"] = fig_to_base64(fig2)
+    plt.close(fig2)
+
+    # 3) Real vs predicho
+    fig3, ax3 = plt.subplots(figsize=(6, 4))
+    ax3.scatter(y_test, y_pred, alpha=0.5)
+    ax3.set_xlabel("Streams reales")
+    ax3.set_ylabel("Streams predichos")
+    ax3.set_title("Real vs Predicción")
+    imagenes["real_vs_pred"] = fig_to_base64(fig3)
+    plt.close(fig3)
+
+    metricas = {
+        "r2": round(r2, 4),
+        "mae": round(mae, 2),
+        "rmse": round(rmse, 2),
+    }
+
+    return imagenes, metricas, None
 
 # ------------------------ ÁRBOL DE DECISIÓN ------------------------ #
-def grafico_arbol_y_metricas():
-    df = df_spotify()
+def generar_graficas_arbol():
+    """
+    Dashboard de Árbol de Decisión:
+      - árbol completo
+      - importancia de variables
+    """
+    try:
+        df = df_spotify()
+    except Exception:
+        return None, None, "No se pudo leer el dataset de Spotify."
+
+    for col in [COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2, COLUMNA_STREAMS]:
+        if col not in df.columns:
+            cols = ", ".join(df.columns)
+            return None, None, f"Falta la columna {col}. Columnas actuales: {cols}"
 
     X = df[[COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2]]
     y = df[COLUMNA_STREAMS]
@@ -95,50 +179,95 @@ def grafico_arbol_y_metricas():
 
     score = arbol.score(X_test, y_test)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    imagenes = {}
+
+    # 1) Árbol
+    fig1, ax1 = plt.subplots(figsize=(10, 6))
     plot_tree(
         arbol,
         feature_names=[COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2],
         filled=True,
         rounded=True,
         fontsize=6,
-        ax=ax
+        ax=ax1,
     )
-    ax.set_title("Árbol de decisión - Predicción de streams")
+    ax1.set_title("Árbol de decisión - Predicción de streams")
+    imagenes["arbol"] = fig_to_base64(fig1)
+    plt.close(fig1)
 
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
+    # 2) Importancia de variables
+    importancias = arbol.feature_importances_
+    fig2, ax2 = plt.subplots(figsize=(6, 4))
+    ax2.bar([COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2], importancias)
+    ax2.set_title("Importancia de variables")
+    ax2.set_ylabel("Importancia")
+    imagenes["importancias"] = fig_to_base64(fig2)
+    plt.close(fig2)
 
-    metricas = {"r2": round(score, 4)}
-    return img64, metricas
+    metricas = {
+        "r2": round(score, 4),
+        "profundidad": arbol.get_depth(),
+        "n_nodos": arbol.tree_.node_count,
+    }
+
+    return imagenes, metricas, None
 
 
 # ----------------------------- K-MEANS ------------------------------ #
-def grafico_kmeans():
-    df = df_spotify()
+def generar_graficas_kmeans():
+    """
+    Dashboard de K-means:
+      - scatter de clusters
+      - tamaño de cada cluster
+    """
+    try:
+        df = df_spotify()
+    except Exception:
+        return None, None, "No se pudo leer el dataset de Spotify."
+
+    for col in [COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2]:
+        if col not in df.columns:
+            cols = ", ".join(df.columns)
+            return None, None, f"Falta la columna {col}. Columnas actuales: {cols}"
+
     X = df[[COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2]]
 
-    kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+    k = 3
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
     clusters = kmeans.fit_predict(X)
 
-    fig, ax = plt.subplots()
-    scatter = ax.scatter(
-        X[COLUMNA_FEATURE_X],
-        X[COLUMNA_FEATURE_X2],
-        c=clusters,
-        alpha=0.6
+    imagenes = {}
+
+    # 1) Scatter de clusters
+    fig1, ax1 = plt.subplots(figsize=(6, 4))
+    scatter = ax1.scatter(
+        X[COLUMNA_FEATURE_X], X[COLUMNA_FEATURE_X2], c=clusters, alpha=0.6
     )
     centers = kmeans.cluster_centers_
-    ax.scatter(centers[:, 0], centers[:, 1], s=200, marker="X")
+    ax1.scatter(centers[:, 0], centers[:, 1], s=200, marker="X")
+    ax1.set_xlabel(COLUMNA_FEATURE_X)
+    ax1.set_ylabel(COLUMNA_FEATURE_X2)
+    ax1.set_title("Clusters K-means")
+    imagenes["clusters"] = fig_to_base64(fig1)
+    plt.close(fig1)
 
-    ax.set_xlabel(COLUMNA_FEATURE_X.capitalize())
-    ax.set_ylabel(COLUMNA_FEATURE_X2.capitalize())
-    ax.set_title("Clusters K-means")
+    # 2) Tamaño de clusters
+    import numpy as np
+    sizes = np.bincount(clusters, minlength=k)
+    fig2, ax2 = plt.subplots(figsize=(6, 4))
+    ax2.bar(range(k), sizes)
+    ax2.set_xlabel("Cluster")
+    ax2.set_ylabel("Número de elementos")
+    ax2.set_title("Tamaño de cada cluster")
+    imagenes["tamanos"] = fig_to_base64(fig2)
+    plt.close(fig2)
 
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
+    metricas = {
+        "k": k,
+        "inercia": round(kmeans.inertia_, 2),
+    }
 
-    return img64
+    return imagenes, metricas, None
 
 
 # ------------------------ ANÁLISIS DE SENTIMIENTO ------------------- #
