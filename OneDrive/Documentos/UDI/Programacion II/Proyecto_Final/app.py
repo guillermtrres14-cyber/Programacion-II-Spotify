@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # Importar modelos
-from modelos.regresion import run_regresion
+from modelos.regresion import run_regression_model
 from modelos.arbol import run_arbol
 from modelos.k_means import run_kmeans
 
