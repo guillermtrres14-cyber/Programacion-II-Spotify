@@ -4,9 +4,6 @@ import re
 from collections import Counter
 import nltk
 
-STOPWORDS_EXTRA = {"spotify", "app", "aplicación", "funciona", "función"}
-STOPWORDS = STOPWORDS_ES.union(STOPWORDS_EXTRA)
-
 RUTA_DATA_SPOTIFY = "data/Spotify_2024_Global_Streaming_Data.csv"
 
 # ✅ OJO: así se llaman en el CSV de Kaggle
