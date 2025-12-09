@@ -1,20 +1,11 @@
 {% if not error %}
   <p>MSE: {{ metricas.mse }} · MAE: {{ metricas.mae }} · R²: {{ metricas.r2 }}</p>
 
-  <h2>Oyentes mensuales vs Streams</h2>
-  <img src="data:image/png;base64,{{ imagenes.scatter_listeners }}">
+<h2>Oyentes mensuales vs Streams</h2>
+<img src="data:image/png;base64,{{ imagenes.scatter_listeners }}" />
 
-  <h2>Intensidad de escucha vs Streams</h2>
-  <img src="data:image/png;base64,{{ imagenes.scatter_intensidad }}">
-
-  <h2>Real vs Predicho</h2>
-  <img src="data:image/png;base64,{{ imagenes.real_vs_pred }}">
-
-  <h2>Distribución de residuos</h2>
-  <img src="data:image/png;base64,{{ imagenes.residuos }}">
-
-  <h2>Línea de regresión con la mejor variable</h2>
-  <img src="data:image/png;base64,{{ imagenes.linea_best }}">
-{% else %}
-  <p class="text-red-500">{{ error }}</p>
-{% endif %} 
+<h2>Intensidad de escucha vs Streams</h2>
+<img src="data:image/png;base64,{{ imagenes.scatter_intensidad }}" />
+<img src="data:image/png;base64,{{ imagenes.modelo }}">
+<img src="data:image/png;base64,{{ imagenes.real_vs_pred }}">
+<img src="data:image/png;base64,{{ imagenes.residuos }}">
