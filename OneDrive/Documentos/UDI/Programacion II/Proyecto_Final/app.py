@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template
 import pandas as pd
 import os
 
@@ -20,14 +20,14 @@ DATA_PATH = os.path.join(BASE_DIR, "data", "Spotify_2024_Global_Streaming_Data.c
 @app.route("/")
 def index():
     """
-    Página principal: solo muestra el dashboard vacío
-    (sin ejecutar ningún modelo todavía).
+    Página principal: solo muestra el dashboard vacío,
+    sin ejecutar modelos todavía.
     """
     return render_template("index.html")
 
 
 # ============================
-#   VISTA REGRESIÓN LINEAL
+#   REGRESIÓN LINEAL
 # ============================
 @app.route("/regresion")
 def vista_regresion():
@@ -44,13 +44,12 @@ def vista_regresion():
 
 
 # ============================
-#     ÁRBOL DE DECISIÓN
+#   ÁRBOL DE DECISIÓN
 # ============================
 @app.route("/arbol")
 def vista_arbol():
     """
-    Ejecuta el modelo de Árbol de Decisión y muestra sus métricas.
-    Más adelante puedes hacer que use otra plantilla o sección.
+    Ejecuta el modelo de Árbol de Decisión y muestra sus métricas y gráficas.
     """
     metrics = run_arbol(DATA_PATH)
     return render_template(
@@ -61,12 +60,12 @@ def vista_arbol():
 
 
 # ============================
-#         K-MEANS
+#   K-MEANS CLUSTERING
 # ============================
 @app.route("/kmeans")
 def vista_kmeans():
     """
-    Ejecuta el modelo K-means y muestra sus métricas.
+    Ejecuta el modelo K-means y muestra sus métricas y gráficas.
     """
     metrics = run_kmeans(DATA_PATH)
     return render_template(
