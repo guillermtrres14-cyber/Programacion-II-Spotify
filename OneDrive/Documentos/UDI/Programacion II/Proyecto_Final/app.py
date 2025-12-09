@@ -6,6 +6,7 @@ import os
 from modelos.regresion import run_regression_model
 from modelos.arbol import run_arbol
 from modelos.k_means import run_kmeans
+from modelos.sentimientos import run_sentimiento
 
 app = Flask(__name__)
 
