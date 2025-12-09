@@ -1,16 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Árbol de Decisión – Spotify 2024 ML{% endblock %}
-
 {% block content %}
 <h1 class="text-3xl font-bold mb-2">Árbol de Decisión</h1>
-<p class="mb-4">
-    Modelo interpretable para entender qué factores explican los streams.
-</p>
+<p class="mb-4">Modelo interpretable para entender qué factores explican los streams.</p>
 
-<div style="text-align:center; margin-top: 20px;">
-    <img src="{{ img_arbol }}"
-         alt="Árbol de decisión Spotify"
-         style="max-width: 100%; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
-</div>
+{% if error %}
+  <p class="text-red-500">Error: {{ error }}</p>
+{% elif grafico_arbol %}
+  <div style="text-align:center;">
+    <img src="data:image/png;base64,{{ grafico_arbol }}" alt="Árbol de decisión" style="max-width:100%; border-radius:12px;">
+  </div>
+  {% if metricas %}
+    <p class="mt-4">R² del modelo: <strong>{{ metricas.r2 }}</strong></p>
+  {% endif %}
+{% else %}
+  <p class="text-red-500">No se pudieron calcular las métricas del Árbol de Decisión.</p>
+{% endif %}
 {% endblock %}

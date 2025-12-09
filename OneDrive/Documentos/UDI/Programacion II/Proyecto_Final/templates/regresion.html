@@ -1,16 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Regresión Lineal – Spotify 2024 ML{% endblock %}
-
 {% block content %}
 <h1 class="text-3xl font-bold mb-2">Resultados del modelo de Regresión Lineal</h1>
-<p class="mb-4">
-    Modelo entrenado sobre el dataset Spotify 2024 Global Streaming.
-</p>
+<p class="mb-4">Modelo entrenado sobre el dataset Spotify 2024 Global Streaming.</p>
 
-<div style="text-align:center; margin-top: 20px;">
-    <img src="{{ img_regresion }}"
-         alt="Gráfico de regresión lineal"
-         style="max-width: 100%; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
-</div>
+{% if error %}
+  <p class="text-red-500">Error: {{ error }}</p>
+{% elif grafico_regresion %}
+  <div style="text-align:center;">
+    <img src="data:image/png;base64,{{ grafico_regresion }}" alt="Gráfico regresión" style="max-width:100%; border-radius:12px;">
+  </div>
+  {% if metricas %}
+    <p class="mt-4">R² del modelo: <strong>{{ metricas.r2 }}</strong></p>
+  {% endif %}
+{% else %}
+  <p class="text-red-500">No se pudieron calcular las métricas de regresión.</p>
+{% endif %}
 {% endblock %}
