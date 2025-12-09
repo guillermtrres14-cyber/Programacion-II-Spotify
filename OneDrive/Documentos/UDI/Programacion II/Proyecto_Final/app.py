@@ -37,13 +37,15 @@ def vista_kmeans():
     return render_template("kmeans.html", metrics=metrics)
 
 
-@app.route("/sentimiento")
-def vista_sentimiento():
-    sentimiento = run_sentimiento(REVIEWS_PATH)
-    return render_template
+@app.route("/")
+def index():
+    return render_template(
         "index.html",
-        sentimiento=sentimiento,
-        selected_model="Análisis de Sentimiento"
+        selected_model=None,
+        metrics=None,
+        results=None,
+        sentimiento=None
+    )
 
 
 @app.route("/dataset")
