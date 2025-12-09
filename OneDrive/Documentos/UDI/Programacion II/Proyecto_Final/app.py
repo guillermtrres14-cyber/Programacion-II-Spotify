@@ -433,12 +433,7 @@ def vista_arbol():
 @app.route("/kmeans")
 def vista_kmeans():
     imagenes, metricas, error = generar_graficas_kmeans()
-    return render_template(
-        "kmeans.html",
-        imagenes=imagenes,
-        metricas=metricas,
-        error=error,
-    )
+    return render_template("kmeans.html", imagenes=imagenes, metricas=metricas, error=error)
 
 @app.route("/sentimiento")
 def vista_sentimiento():
