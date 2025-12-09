@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Spotify ML Dashboard 2024</title>
 
-    <!-- Fuentes y estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -17,98 +16,108 @@
 
     <!-- NAVBAR -->
     <header class="navbar">
-        <div class="navbar-content">
-            <div class="logo">
-                <div class="logo-icon">ML</div>
-                <div>
-                    <div class="logo-text-main">Spotify</div>
-                    <div class="logo-text-sub">ML Dashboard</div>
-                </div>
+        <div class="logo">
+            <div class="logo-icon">ML</div>
+            <div>
+                <div class="logo-text-main">Spotify ML Dashboard</div>
+                <div class="logo-text-sub">Proyecto de Machine Learning – 2024</div>
             </div>
-
-            <nav class="nav-links">
-                <a href="{{ url_for('index') }}">🏠 Inicio</a>
-                <a href="{{ url_for('vista_regresion') }}">📈 Regresión Lineal</a>
-                <a href="{{ url_for('vista_arbol') }}">🌳 Árbol de Decisión</a>
-                <a href="{{ url_for('vista_kmeans') }}">🧩 K-means</a>
-                <a href="{{ url_for('vista_sentimiento') }}">💬 Sentimiento</a>
-                <a href="{{ url_for('vista_dataset') }}">📊 Dataset</a>
-            </nav>
         </div>
+
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <a href="{{ url_for('vista_regresion') }}">Regresión Lineal</a>
+            <a href="{{ url_for('vista_arbol') }}">Árbol de Decisión</a>
+            <a href="{{ url_for('vista_kmeans') }}">K-means</a>
+            <a href="{{ url_for('vista_sentimiento') }}">Sentimiento</a>
+            <a href="{{ url_for('vista_dataset') }}">Dataset</a>
+        </nav>
     </header>
 
     <!-- HERO -->
     <section class="hero">
+        <div class="hero-text">
 
-        <div class="hero-left">
-            <div class="hero-tag">PROYECTO 2024 · ML</div>
+            <div class="eyebrow">
+                <span></span>
+                <div>Análisis global de streaming en Spotify</div>
+            </div>
 
             <h1 class="hero-title">
-                Dashboard de <span class="highlight">Machine Learning</span><br>
-                para Spotify 2024
+                Predice y agrupa <span class="hero-highlight">streams</span>
+                con modelos de Machine Learning.
             </h1>
 
             <p class="hero-subtitle">
-                Explora modelos de regresión, árboles de decisión, clustering y análisis de sentimiento 
-                sobre datos reales del streaming global.
+                Esta plataforma permite ejecutar modelos de Regresión Lineal,
+                Árbol de Decisión, K-means y Análisis de Sentimiento usando datos reales de Spotify.
             </p>
 
             <!-- BOTONES PRINCIPALES -->
-            <div class="hero-buttons">
-
+            <div class="hero-actions">
                 <a href="{{ url_for('vista_regresion') }}" class="btn-primary">
-                    Empezar por Regresión
+                    Ejecutar Regresión de Streams
                 </a>
-
-                <a href="{{ url_for('vista_dataset') }}" class="btn-secondary">
-                    Ver Dataset
+                <a href="{{ url_for('vista_dataset') }}" class="btn-ghost">
+                    Ver muestra del Dataset
                 </a>
-
             </div>
 
-            <div class="hero-buttons">
+            <!-- AQUÍ ESTÁ EL BOTÓN CORREGIDO -->
+            <div class="hero-actions">
                 <a href="{{ url_for('vista_sentimiento') }}" class="btn-primary">
-                    💬 Analizar Sentimiento
+                    Analizar Sentimiento
                 </a>
             </div>
-
         </div>
 
-        <!-- PANEL DERECHO -->
+        <!-- PANEL DERECHA DE MÉTRICAS -->
         <aside class="hero-panel">
             <div class="panel-header">
-                <div class="panel-title">Modelos disponibles</div>
-                <div class="panel-tag">ML 2024</div>
+                <div>
+                    <div class="panel-title">
+                        {% if selected_model %}
+                            Resultados – {{ selected_model }}
+                        {% else %}
+                            Resultados del modelo
+                        {% endif %}
+                    </div>
+
+                    <div class="panel-subtitle">
+                        {% if metrics %}
+                            {{ metrics.tipo }}
+                        {% else %}
+                            Aún no has ejecutado ningún modelo.
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="panel-chip">Spotify 2024</div>
             </div>
 
-            <p class="panel-desc">Explora cada modelo paso a paso.</p>
-
-            <div class="panel-grid">
-
-                <div class="panel-card">
-                    <div class="panel-icon">📈</div>
-                    <div class="panel-text">Predicción con Regresión Lineal</div>
+            {% if metrics and metrics.ok %}
+                <div class="metrics-grid">
+                    {% if metrics.R2 %}
+                        <div><div class="metric-label">R²</div><div class="metric-value">{{ metrics.R2 }}</div></div>
+                    {% endif %}
+                    {% if metrics.MSE %}
+                        <div><div class="metric-label">MSE</div><div class="metric-value">{{ metrics.MSE }}</div></div>
+                    {% endif %}
+                    {% if metrics.MAE %}
+                        <div><div class="metric-label">MAE</div><div class="metric-value">{{ metrics.MAE }}</div></div>
+                    {% endif %}
+                    {% if metrics.n_clusters %}
+                        <div><div class="metric-label">Clusters</div><div class="metric-value">{{ metrics.n_clusters }}</div></div>
+                    {% endif %}
+                    {% if metrics.inercia %}
+                        <div><div class="metric-label">Inercia</div><div class="metric-value">{{ metrics.inercia }}</div></div>
+                    {% endif %}
                 </div>
-
-                <div class="panel-card">
-                    <div class="panel-icon">🌳</div>
-                    <div class="panel-text">Interpretabilidad con Árbol</div>
+            {% else %}
+                <div class="panel-footer">
+                    Ejecuta un modelo para ver métricas aquí.
                 </div>
-
-                <div class="panel-card">
-                    <div class="panel-icon">🧩</div>
-                    <div class="panel-text">Segmentación con K-means</div>
-                </div>
-
-                <div class="panel-card">
-                    <div class="panel-icon">💬</div>
-                    <div class="panel-text">Opinión de usuarios</div>
-                </div>
-            </div>
-
-            <p class="panel-footer">
-                Basado en datos reales de Spotify 2024.
-            </p>
+            {% endif %}
         </aside>
     </section>
 </div>
