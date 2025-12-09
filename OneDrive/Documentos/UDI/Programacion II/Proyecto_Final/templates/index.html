@@ -56,8 +56,10 @@
             </div>
 
             <div class="hero-meta">
-                {% if metrics is defined and metrics %}
-                    Modelo seleccionado: <strong>{{ selected_model }}</strong>
+                {% if results and results.ok %}
+                    Modelo actual: <strong>Regresión Lineal</strong> ·
+                    Target: <strong>{{ results.target }}</strong> ·
+                    R²: <strong>{{ results.r2 }}</strong>
                 {% else %}
                     Selecciona uno de los modelos para ver sus métricas en tiempo real.
                 {% endif %}
@@ -69,85 +71,104 @@
             <div class="panel-header">
                 <div>
                     <div class="panel-title">
-                        {% if selected_model %}
-                            Resultados – {{ selected_model }}
+                        {% if results and results.ok %}
+                            Resultados – Regresión Lineal
                         {% else %}
                             Resultados del modelo
                         {% endif %}
                     </div>
                     <div class="panel-subtitle">
-                        {% if metrics is defined and metrics %}
-                            {{ metrics.tipo }}
+                        {% if results and results.ok %}
+                            Predicción de Total Streams (Millions)
                         {% else %}
-                            Aún no has ejecutado ningún modelo.
+                            Aún no se han podido calcular métricas.
                         {% endif %}
                     </div>
                 </div>
                 <div class="panel-chip">Spotify 2024</div>
             </div>
 
-            {% if metrics is defined and metrics %}
+            {% if results and results.ok %}
                 <div class="metrics-grid">
-                    {% if metrics.MAE is defined %}
-                    <div>
-                        <div class="metric-label">MAE</div>
-                        <div class="metric-value">{{ metrics.MAE }}</div>
-                    </div>
-                    {% endif %}
-                    {% if metrics.MSE is defined %}
-                    <div>
-                        <div class="metric-label">MSE</div>
-                        <div class="metric-value">{{ metrics.MSE }}</div>
-                    </div>
-                    {% endif %}
-                    {% if metrics.RMSE is defined %}
-                    <div>
-                        <div class="metric-label">RMSE</div>
-                        <div class="metric-value">{{ metrics.RMSE }}</div>
-                    </div>
-                    {% endif %}
-                    {% if metrics.R2 is defined %}
                     <div>
                         <div class="metric-label">R²</div>
-                        <div class="metric-value">{{ metrics.R2 }}</div>
+                        <div class="metric-value">{{ results.r2 }}</div>
                     </div>
-                    {% endif %}
-                    {% if metrics.n_clusters is defined %}
                     <div>
-                        <div class="metric-label">Clusters (K-means)</div>
-                        <div class="metric-value">{{ metrics.n_clusters }}</div>
+                        <div class="metric-label">MSE</div>
+                        <div class="metric-value">{{ results.mse }}</div>
                     </div>
-                    {% endif %}
-                    {% if metrics.inercia is defined %}
                     <div>
-                        <div class="metric-label">Inercia</div>
-                        <div class="metric-value">{{ metrics.inercia }}</div>
+                        <div class="metric-label">MAE</div>
+                        <div class="metric-value">{{ results.mae }}</div>
                     </div>
-                    {% endif %}
+                    <div>
+                        <div class="metric-label">Mejor predictor</div>
+                        <div class="metric-value">{{ results.best_feature }}</div>
+                    </div>
                 </div>
 
-                {% set clusters = metrics.get('tamaño_clusters') if metrics.get is not none else None %}
-                {% if clusters %}
-                    <div class="panel-footer">
-                        Distribución de clusters:
-                        <div class="clusters">
-                            {% for cid, size in clusters.items() %}
-                                <div>Cluster {{ cid }} → <span>{{ size }} canciones</span></div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% elif metrics.columna_objetivo is defined %}
-                    <div class="panel-footer">
-                        Modelo entrenado para predecir <span>{{ metrics.columna_objetivo }}</span>.
-                    </div>
-                {% endif %}
+                <div class="panel-footer">
+                    El modelo se entrenó para predecir
+                    <span>{{ results.target }}</span> usando variables numéricas del dataset
+                    de Spotify 2024.
+                </div>
             {% else %}
                 <div class="panel-footer">
-                    Ejecuta cualquiera de los modelos de la parte inferior para visualizar
-                    aquí sus métricas principales (MAE, MSE, RMSE, R² o inercia de K-means).
+                    Ejecuta la regresión lineal para visualizar aquí sus métricas principales
+                    (R², MSE y MAE) y entender qué variables explican mejor los streams.
+                    {% if results and not results.ok %}
+                        <br><br>
+                        <span style="color:#e74c3c; font-size: 0.9rem;">
+                            {{ results.error }}
+                        </span>
+                    {% endif %}
                 </div>
             {% endif %}
         </aside>
+    </section>
+
+    <!-- VISUALIZACIONES PRINCIPALES -->
+    <section class="charts-section">
+        {% if results and results.ok %}
+            <h2 class="section-title">Visualizaciones de la Regresión Lineal</h2>
+            <p class="section-subtitle">
+                Las siguientes gráficas muestran la relación entre la variable más
+                influyente y el objetivo, así como la importancia relativa de las
+                variables del modelo.
+            </p>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Relación {{ results.best_feature }} vs {{ results.target }}</h3>
+                    <p class="chart-description">
+                        Dispersión de los datos reales y línea de regresión ajustada.
+                    </p>
+                    {% if results.images.scatter %}
+                        <img
+                            src="{{ url_for('static', filename=results.images.scatter) }}"
+                            alt="Scatter + línea de regresión"
+                            class="chart-image"
+                        >
+                    {% endif %}
+                </div>
+
+                <div class="chart-card">
+                    <h3>Importancia de Variables</h3>
+                    <p class="chart-description">
+                        Importancia (valor absoluto del coeficiente) de cada variable
+                        en el modelo de regresión lineal.
+                    </p>
+                    {% if results.images.importancia %}
+                        <img
+                            src="{{ url_for('static', filename=results.images.importancia) }}"
+                            alt="Importancia de variables en la regresión"
+                            class="chart-image"
+                        >
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
     </section>
 
     <!-- CARDS DE MODELOS -->
@@ -195,3 +216,13 @@
 </div>
 </body>
 </html>
+🔧 Recuerda: para que esto funcione, tu app.py debe estar enviando a la plantilla una variable llamada results, algo así:
+
+python
+Copiar código
+from modelos.regresion import run_regression_model
+
+@app.route("/")
+def index():
+    results = run_regression_model()
+    return render_template("index.html", results=results)
