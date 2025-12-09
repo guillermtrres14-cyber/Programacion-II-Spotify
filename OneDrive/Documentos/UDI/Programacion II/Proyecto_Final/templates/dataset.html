@@ -1,15 +1,63 @@
 {% extends "base.html" %}
-
-{% block title %}Dataset · Spotify ML{% endblock %}
-{% block top_title %}Vista rápida del Dataset{% endblock %}
-
 {% block content %}
-<section class="section-header">
-    <h2>Spotify 2024 Global Streaming</h2>
-    <p>{{ n_filas }} filas · {{ n_columnas }} columnas (se muestra una muestra de 50 registros).</p>
-</section>
 
-<div class="table-wrapper">
-    {{ tabla | safe }}
+<h1 style="text-align:center; margin-bottom:0.3rem;">
+    Spotify 2024 Global Streaming
+</h1>
+
+<p style="text-align:center; color:rgba(255,255,255,0.65); margin-bottom:2rem;">
+    {{ filas }} filas · {{ columnas }} columnas 
+    <span style="color:rgba(255,255,255,0.45);">
+        (se muestra una muestra de 50 registros)
+    </span>
+</p>
+
+<div class="tabla-container">
+    {{ tabla_html|safe }}
 </div>
+
+<style>
+    .tabla-container {
+        max-width: 1100px;
+        margin: auto;
+        border-radius: 10px;
+        overflow-x: auto;
+        padding: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #ffffff;
+        font-size: 0.85rem;
+    }
+
+    thead tr {
+        background-color: rgba(255,255,255,0.12);
+        border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+
+    th {
+        padding: 10px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    td {
+        padding: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: rgba(255,255,255,0.04);
+    }
+
+    tbody tr:hover {
+        background-color: rgba(0,255,200,0.1);
+        transition: 0.2s ease-in-out;
+    }
+</style>
+
 {% endblock %}
