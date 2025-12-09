@@ -153,8 +153,9 @@ def grafico_kmeans():
 # ------------------------ ANÁLISIS DE SENTIMIENTO ------------------- #
 def grafico_sentimiento():
     """
-    Lee un CSV de reseñas y trata de detectar automáticamente
-    la columna de sentimiento (sentiment/label/polarity...).
+    Genera un gráfico de barras de sentimiento / score
+    a partir del CSV de reseñas.
+    Usa la columna 'sentiment' si existe; si no, usa 'score'.
     Devuelve (imagen_base64, mensaje_error).
     """
     try:
@@ -162,36 +163,34 @@ def grafico_sentimiento():
     except Exception:
         return None, "No se pudo leer el archivo de reseñas en " + RUTA_DATA_REVIEWS
 
-    # intentar encontrar una columna adecuada
     col_sent = None
+
+    # 1) Preferimos una columna de sentimiento si existe
     for c in df.columns:
         cl = c.lower()
-        if (
-            cl == COLUMNA_SENTIMIENTO.lower()
-            or "sentiment" in cl
-            or "label" in cl
-            or "polarity" in cl
-        ):
+        if "sentiment" in cl or "label" in cl or "polarity" in cl:
             col_sent = c
             break
 
+    # 2) Si no existe, usamos 'score' si está disponible
     if col_sent is None:
-        # no encontramos columna de sentimiento
-        cols = ", ".join(df.columns)
-        msg = (
-            "No se encontró una columna de sentimiento. "
-            f"Columnas disponibles en el CSV: {cols}"
-        )
-        return None, msg
+        if "score" in df.columns:
+            col_sent = "score"
+        else:
+            cols = ", ".join(df.columns)
+            msg = (
+                "No se encontró columna de sentimiento ni 'score'. "
+                f"Columnas disponibles en el CSV: {cols}"
+            )
+            return None, msg
 
-    # contamos los valores de la columna detectada
-    conteo = df[col_sent].value_counts()
+    conteo = df[col_sent].value_counts().sort_index()
 
     fig, ax = plt.subplots()
     conteo.plot(kind="bar", ax=ax)
-    ax.set_xlabel("Sentimiento")
+    ax.set_xlabel(col_sent)
     ax.set_ylabel("Número de reseñas")
-    ax.set_title(f"Distribución de sentimiento ({col_sent}) en reseñas de Spotify")
+    ax.set_title(f"Distribución de {col_sent} en reseñas de Spotify")
 
     img64 = fig_to_base64(fig)
     plt.close(fig)
