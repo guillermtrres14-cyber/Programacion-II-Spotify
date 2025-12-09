@@ -1,111 +1,108 @@
-import os
-import numpy as np
-import pandas as pd
-
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 
-# === RUTAS DEL PROYECTO ===
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))   # carpeta PROYECTO_FINAL
-DATA_DIR = os.path.join(BASE_DIR, "data")
-STATIC_IMG_DIR = os.path.join(BASE_DIR, "static", "img")
+def generar_graficas_regresion():
+    df_clean, numeric_cols, feature_cols = cargar_spotify_limpio()
 
-os.makedirs(STATIC_IMG_DIR, exist_ok=True)
+    # ======== 1) Modelo multivariable como en el notebook ========
+    X = df_clean[feature_cols]
+    y = df_clean[TARGET_COL]
 
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-def run_regression_model():
-    try:
-        # === 1) Cargar dataset de Spotify ===
-        file_path = os.path.join(DATA_DIR, "Spotify_2024_Global_Streaming_Data.csv")
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"No se encontró el dataset en: {file_path}")
+    lin_reg = LinearRegression()
+    lin_reg.fit(X_train, y_train)
+    y_pred = lin_reg.predict(X_test)
 
-        df = pd.read_csv(file_path)
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
 
-        # === 2) Limpiar y seleccionar numéricas ===
-        numeric_df = df.select_dtypes(include="number").dropna()
+    imagenes = {}
 
-        target = "Total Streams (Millions)"
-        if target not in numeric_df.columns:
-            raise ValueError(f"La columna objetivo '{target}' no existe en el dataset")
+    # --- Gráfico A: Oyentes mensuales vs streams totales ---
+    fig_a, ax_a = plt.subplots(figsize=(6, 4))
+    ax_a.scatter(
+        df_clean["Monthly Listeners (Millions)"],
+        df_clean["Total Streams (Millions)"],
+        alpha=0.5,
+    )
+    ax_a.set_xlabel("Monthly Listeners (Millions)")
+    ax_a.set_ylabel("Total Streams (Millions)")
+    ax_a.set_title("Oyentes mensuales vs Streams totales")
+    imagenes["scatter_listeners"] = fig_to_base64(fig_a)
+    plt.close(fig_a)
 
-        X = numeric_df.drop(columns=[target])
-        y = numeric_df[target]
+    # --- Gráfico B: Streams per Listener vs streams totales ---
+    fig_b, ax_b = plt.subplots(figsize=(6, 4))
+    ax_b.scatter(
+        df_clean["Streams per Listener"],
+        df_clean["Total Streams (Millions)"],
+        alpha=0.5,
+    )
+    ax_b.set_xlabel("Streams per Listener")
+    ax_b.set_ylabel("Total Streams (Millions)")
+    ax_b.set_title("Intensidad de escucha vs Streams totales")
+    imagenes["scatter_intensidad"] = fig_to_base64(fig_b)
+    plt.close(fig_b)
 
-        # === 3) Train/test ===
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42
-        )
+    # --- Gráfico C: Real vs Predicho con línea ideal ---
+    fig_c, ax_c = plt.subplots(figsize=(6, 4))
+    ax_c.scatter(y_test, y_pred, alpha=0.5, label="Predicciones")
+    min_val = min(y_test.min(), y_pred.min())
+    max_val = max(y_test.max(), y_pred.max())
+    ax_c.plot([min_val, max_val], [min_val, max_val], linestyle="--", label="Línea ideal")
+    ax_c.set_xlabel(f"Valor real ({TARGET_COL})")
+    ax_c.set_ylabel(f"Predicción ({TARGET_COL})")
+    ax_c.set_title("Real vs Predicho – Regresión Lineal")
+    ax_c.legend()
+    imagenes["real_vs_pred"] = fig_to_base64(fig_c)
+    plt.close(fig_c)
 
-        model = LinearRegression()
-        model.fit(X_train, y_train)
-        pred = model.predict(X_test)
+    # --- Gráfico D: Distribución de residuos ---
+    residuals = y_test - y_pred
+    fig_d, ax_d = plt.subplots(figsize=(6, 4))
+    ax_d.hist(residuals, bins=30)
+    ax_d.set_title("Distribución de residuos (error)")
+    ax_d.set_xlabel("Error (real - predicho)")
+    ax_d.set_ylabel("Frecuencia")
+    imagenes["residuos"] = fig_to_base64(fig_d)
+    plt.close(fig_d)
 
-        # === 4) Métricas ===
-        mse = mean_squared_error(y_test, pred)
-        mae = mean_absolute_error(y_test, pred)
-        r2 = r2_score(y_test, pred)
+    # ======== 2) Regresión 1D con la mejor característica ========
+    corr = df_clean[numeric_cols].corr()[TARGET_COL]
+    corr_features = corr.drop(TARGET_COL).abs().sort_values(ascending=False)
+    best_feature = corr_features.index[0]
 
-        # === 5) Mejor variable correlacionada ===
-        corr = numeric_df.corr()[target].drop(target)
-        best_feature = corr.abs().sort_values(ascending=False).index[0]
+    lin_1d = LinearRegression()
+    X_best = df_clean[[best_feature]]
+    y_all = df_clean[TARGET_COL]
+    lin_1d.fit(X_best, y_all)
 
-        # === 6) Gráfico Scatter + Regresión ===
-        X_best = numeric_df[[best_feature]]
-        y_all = numeric_df[target]
+    x_min, x_max = X_best[best_feature].min(), X_best[best_feature].max()
+    x_line = np.linspace(x_min, x_max, 100)
+    X_line = pd.DataFrame({best_feature: x_line})
+    y_line = lin_1d.predict(X_line)
 
-        line_model = LinearRegression()
-        line_model.fit(X_best, y_all)
+    fig_e, ax_e = plt.subplots(figsize=(7, 5))
+    ax_e.scatter(X_best[best_feature], y_all, alpha=0.3, label="Datos reales")
+    ax_e.plot(x_line, y_line, linewidth=2, label="Línea de regresión")
+    ax_e.set_xlabel(best_feature)
+    ax_e.set_ylabel(TARGET_COL)
+    ax_e.set_title(f"Línea de regresión usando {best_feature}")
+    ax_e.legend()
+    imagenes["linea_best"] = fig_to_base64(fig_e)
+    plt.close(fig_e)
 
-        x_line = np.linspace(X_best.min(), X_best.max(), 100)
-        y_line = line_model.predict(pd.DataFrame({best_feature: x_line.flatten()}))
+    metricas = {
+        "mse": round(mse, 3),
+        "mae": round(mae, 3),
+        "r2": round(r2, 4),
+        "mejor_feature": best_feature,
+    }
 
-        plt.figure(figsize=(7, 5))
-        plt.scatter(X_best, y_all, alpha=0.3, label="Datos reales")
-        plt.plot(x_line, y_line, color="red", linewidth=2, label="Regresión")
-        plt.xlabel(best_feature)
-        plt.ylabel(target)
-        plt.title(f"Relación entre {best_feature} y {target}")
-        plt.legend()
-        scatter_path = os.path.join(STATIC_IMG_DIR, "regresion_scatter.png")
-        plt.savefig(scatter_path, dpi=120)
-        plt.close()
-
-        # === 7) Importancia (coeficientes) ===
-        coef_importance = np.abs(model.coef_)
-        feature_names = list(X.columns)
-
-        plt.figure(figsize=(8, 5))
-        plt.barh(feature_names, coef_importance)
-        plt.title("Importancia de Variables (|coeficiente|)")
-        plt.xlabel("Importancia")
-        plt.tight_layout()
-        coef_path = os.path.join(STATIC_IMG_DIR, "regresion_importancia.png")
-        plt.savefig(coef_path, dpi=120)
-        plt.close()
-
-        return {
-            "ok": True,
-            "target": target,
-            "best_feature": best_feature,
-            "mse": round(float(mse), 3),
-            "mae": round(float(mae), 3),
-            "r2": round(float(r2), 3),
-            "images": {
-                "scatter": "img/regresion_scatter.png",
-                "importancia": "img/regresion_importancia.png"
-            }
-        }
-
-    except Exception as e:
-        return {
-            "ok": False,
-            "error": str(e),
-            "images": {}
-        }
+    return imagenes, metricas, None
