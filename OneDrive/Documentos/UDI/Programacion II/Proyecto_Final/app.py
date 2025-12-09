@@ -75,6 +75,17 @@ def vista_kmeans():
         metrics=metrics
     )
 
+@app.route("/sentimiento")
+def vista_sentimiento():
+    """
+    Ejecuta el análisis de sentimiento sobre spotify_reviews.csv
+    y muestra las gráficas en el dashboard.
+    """
+    sentimiento = run_sentimiento()
+    return render_template(
+        "index.html",
+        sentimiento=sentimiento
+    )
 
 # ============================
 #          DATASET
