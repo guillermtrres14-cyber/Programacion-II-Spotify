@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # Importar modelos
-from modelos.regresion import run_regression_model
+from modelos.regresion_model import run_regression_model
 from modelos.arbol import run_arbol
 from modelos.k_means import run_kmeans
 
@@ -19,9 +19,9 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/regresion")
-def vista_regresion():
-    metrics = run_regresion(DATA_PATH)
+@app.route("/")
+def index():
+    results = run_regression_model()
     return render_template("index.html", results=results)
 
 
