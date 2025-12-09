@@ -26,6 +26,9 @@
         </nav>
     </header>
 
+    {% set hay_regresion = results is defined and results and results.ok %}
+    {% set hay_arbol = metrics is defined and metrics and metrics.ok and selected_model == "Árbol de Decisión" %}
+
     <!-- HERO -->
     <section class="hero">
         <div class="hero-text">
@@ -56,10 +59,14 @@
             </div>
 
             <div class="hero-meta">
-                {% if results and results.ok %}
+                {% if hay_regresion %}
                     Modelo actual: <strong>Regresión Lineal</strong> ·
                     Target: <strong>{{ results.target }}</strong> ·
                     R²: <strong>{{ results.r2 }}</strong>
+                {% elif hay_arbol %}
+                    Modelo actual: <strong>Árbol de Decisión</strong> ·
+                    Target: <strong>{{ metrics.columna_objetivo }}</strong> ·
+                    R²: <strong>{{ metrics.R2 }}</strong>
                 {% else %}
                     Selecciona uno de los modelos para ver sus métricas en tiempo real.
                 {% endif %}
@@ -71,15 +78,19 @@
             <div class="panel-header">
                 <div>
                     <div class="panel-title">
-                        {% if results and results.ok %}
+                        {% if hay_regresion %}
                             Resultados – Regresión Lineal
+                        {% elif hay_arbol %}
+                            Resultados – Árbol de Decisión
                         {% else %}
                             Resultados del modelo
                         {% endif %}
                     </div>
                     <div class="panel-subtitle">
-                        {% if results and results.ok %}
+                        {% if hay_regresion %}
                             Predicción de Total Streams (Millions)
+                        {% elif hay_arbol %}
+                            {{ metrics.tipo }}
                         {% else %}
                             Aún no se han podido calcular métricas.
                         {% endif %}
@@ -88,7 +99,7 @@
                 <div class="panel-chip">Spotify 2024</div>
             </div>
 
-            {% if results and results.ok %}
+            {% if hay_regresion %}
                 <div class="metrics-grid">
                     <div>
                         <div class="metric-label">R²</div>
@@ -113,14 +124,54 @@
                     <span>{{ results.target }}</span> usando variables numéricas del dataset
                     de Spotify 2024.
                 </div>
+
+            {% elif hay_arbol %}
+                <div class="metrics-grid">
+                    {% if metrics.MAE is defined %}
+                    <div>
+                        <div class="metric-label">MAE</div>
+                        <div class="metric-value">{{ metrics.MAE }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.MSE is defined %}
+                    <div>
+                        <div class="metric-label">MSE</div>
+                        <div class="metric-value">{{ metrics.MSE }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.RMSE is defined %}
+                    <div>
+                        <div class="metric-label">RMSE</div>
+                        <div class="metric-value">{{ metrics.RMSE }}</div>
+                    </div>
+                    {% endif %}
+                    {% if metrics.R2 is defined %}
+                    <div>
+                        <div class="metric-label">R²</div>
+                        <div class="metric-value">{{ metrics.R2 }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="panel-footer">
+                    Modelo entrenado para predecir
+                    <span>{{ metrics.columna_objetivo }}</span> usando un Árbol de Decisión
+                    sobre variables numéricas del dataset de Spotify 2024.
+                </div>
+
             {% else %}
                 <div class="panel-footer">
-                    Ejecuta la regresión lineal para visualizar aquí sus métricas principales
-                    (R², MSE y MAE) y entender qué variables explican mejor los streams.
-                    {% if results and not results.ok %}
+                    Ejecuta alguno de los modelos para visualizar aquí sus métricas principales
+                    (R², MSE, MAE, RMSE, etc.) y entender qué variables explican mejor los streams.
+                    {% if results is defined and results and not results.ok %}
                         <br><br>
                         <span style="color:#e74c3c; font-size: 0.9rem;">
                             {{ results.error }}
+                        </span>
+                    {% elif metrics is defined and metrics and not metrics.ok %}
+                        <br><br>
+                        <span style="color:#e74c3c; font-size: 0.9rem;">
+                            {{ metrics.error }}
                         </span>
                     {% endif %}
                 </div>
@@ -128,48 +179,91 @@
         </aside>
     </section>
 
-    <!-- VISUALIZACIONES PRINCIPALES -->
+    <!-- VISUALIZACIONES REGRESIÓN -->
+    {% if hay_regresion %}
     <section class="charts-section">
-        {% if results and results.ok %}
-            <h2 class="section-title">Visualizaciones de la Regresión Lineal</h2>
-            <p class="section-subtitle">
-                Las siguientes gráficas muestran la relación entre la variable más
-                influyente y el objetivo, así como la importancia relativa de las
-                variables del modelo.
-            </p>
+        <h2 class="section-title">Visualizaciones de la Regresión Lineal</h2>
+        <p class="section-subtitle">
+            Las siguientes gráficas muestran la relación entre la variable más
+            influyente y el objetivo, así como la importancia relativa de las
+            variables del modelo.
+        </p>
 
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <h3>Relación {{ results.best_feature }} vs {{ results.target }}</h3>
-                    <p class="chart-description">
-                        Dispersión de los datos reales y línea de regresión ajustada.
-                    </p>
-                    {% if results.images.scatter %}
-                        <img
-                            src="{{ url_for('static', filename=results.images.scatter) }}"
-                            alt="Scatter + línea de regresión"
-                            class="chart-image"
-                        >
-                    {% endif %}
-                </div>
-
-                <div class="chart-card">
-                    <h3>Importancia de Variables</h3>
-                    <p class="chart-description">
-                        Importancia (valor absoluto del coeficiente) de cada variable
-                        en el modelo de regresión lineal.
-                    </p>
-                    {% if results.images.importancia %}
-                        <img
-                            src="{{ url_for('static', filename=results.images.importancia) }}"
-                            alt="Importancia de variables en la regresión"
-                            class="chart-image"
-                        >
-                    {% endif %}
-                </div>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Relación {{ results.best_feature }} vs {{ results.target }}</h3>
+                <p class="chart-description">
+                    Dispersión de los datos reales y línea de regresión ajustada.
+                </p>
+                {% if results.images.scatter %}
+                    <img
+                        src="{{ url_for('static', filename=results.images.scatter) }}"
+                        alt="Scatter + línea de regresión"
+                        class="chart-image"
+                    >
+                {% endif %}
             </div>
-        {% endif %}
+
+            <div class="chart-card">
+                <h3>Importancia de Variables</h3>
+                <p class="chart-description">
+                    Importancia (valor absoluto del coeficiente) de cada variable
+                    en el modelo de regresión lineal.
+                </p>
+                {% if results.images.importancia %}
+                    <img
+                        src="{{ url_for('static', filename=results.images.importancia) }}"
+                        alt="Importancia de variables en la regresión"
+                        class="chart-image"
+                    >
+                {% endif %}
+            </div>
+        </div>
     </section>
+    {% endif %}
+
+    <!-- VISUALIZACIONES ÁRBOL DE DECISIÓN -->
+    {% if hay_arbol %}
+    <section class="charts-section">
+        <h2 class="section-title">Visualizaciones del Árbol de Decisión</h2>
+        <p class="section-subtitle">
+            El Árbol de Decisión permite entender cómo distintas variables explican
+            el total de streams. A continuación se muestra el desempeño del modelo
+            y la importancia de las variables.
+        </p>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Streams reales vs predichos</h3>
+                <p class="chart-description">
+                    Cada punto representa una observación del conjunto de prueba;
+                    la línea roja indica la predicción perfecta.
+                </p>
+                {% if metrics.images.real_vs_pred %}
+                    <img
+                        src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}"
+                        alt="Árbol de decisión: Real vs Predicho"
+                        class="chart-image"
+                    >
+                {% endif %}
+            </div>
+
+            <div class="chart-card">
+                <h3>Importancia de variables</h3>
+                <p class="chart-description">
+                    Variables con mayor peso en las decisiones del árbol.
+                </p>
+                {% if metrics.images.importancia %}
+                    <img
+                        src="{{ url_for('static', filename=metrics.images.importancia) }}"
+                        alt="Árbol de decisión: Importancia de variables"
+                        class="chart-image"
+                    >
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <!-- CARDS DE MODELOS -->
     <section class="cards">
@@ -216,55 +310,3 @@
 </div>
 </body>
 </html>
-🔧 Recuerda: para que esto funcione, tu app.py debe estar enviando a la plantilla una variable llamada results, algo así:
-
-python
-Copiar código
-from modelos.regresion import run_regression_model
-
-@app.route("/")
-def index():
-    results = run_regression_model()
-    return render_template("index.html", results=results)
-    {# VISUALIZACIONES ÁRBOL DE DECISIÓN #}
-{% if selected_model == "Árbol de Decisión" and metrics and metrics.ok %}
-<section class="charts-section">
-    <h2 class="section-title">Visualizaciones del Árbol de Decisión</h2>
-    <p class="section-subtitle">
-        El Árbol de Decisión permite entender cómo distintas variables explican
-        el total de streams. A continuación se muestra el desempeño del modelo
-        y la importancia de las variables.
-    </p>
-
-    <div class="charts-grid">
-        <div class="chart-card">
-            <h3>Streams reales vs predichos</h3>
-            <p class="chart-description">
-                Cada punto representa una observación del conjunto de prueba;
-                la línea roja indica la predicción perfecta.
-            </p>
-            {% if metrics.images.real_vs_pred %}
-                <img
-                    src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}"
-                    alt="Árbol de decisión: Real vs Predicho"
-                    class="chart-image"
-                >
-            {% endif %}
-        </div>
-
-        <div class="chart-card">
-            <h3>Importancia de variables</h3>
-            <p class="chart-description">
-                Variables con mayor peso en las decisiones del árbol.
-            </p>
-            {% if metrics.images.importancia %}
-                <img
-                    src="{{ url_for('static', filename=metrics.images.importancia) }}"
-                    alt="Árbol de decisión: Importancia de variables"
-                    class="chart-image"
-                >
-            {% endif %}
-        </div>
-    </div>
-</section>
-{% endif %}
