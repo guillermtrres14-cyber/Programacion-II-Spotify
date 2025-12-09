@@ -226,3 +226,45 @@ from modelos.regresion import run_regression_model
 def index():
     results = run_regression_model()
     return render_template("index.html", results=results)
+    {# VISUALIZACIONES ÁRBOL DE DECISIÓN #}
+{% if selected_model == "Árbol de Decisión" and metrics and metrics.ok %}
+<section class="charts-section">
+    <h2 class="section-title">Visualizaciones del Árbol de Decisión</h2>
+    <p class="section-subtitle">
+        El Árbol de Decisión permite entender cómo distintas variables explican
+        el total de streams. A continuación se muestra el desempeño del modelo
+        y la importancia de las variables.
+    </p>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Streams reales vs predichos</h3>
+            <p class="chart-description">
+                Cada punto representa una observación del conjunto de prueba;
+                la línea roja indica la predicción perfecta.
+            </p>
+            {% if metrics.images.real_vs_pred %}
+                <img
+                    src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}"
+                    alt="Árbol de decisión: Real vs Predicho"
+                    class="chart-image"
+                >
+            {% endif %}
+        </div>
+
+        <div class="chart-card">
+            <h3>Importancia de variables</h3>
+            <p class="chart-description">
+                Variables con mayor peso en las decisiones del árbol.
+            </p>
+            {% if metrics.images.importancia %}
+                <img
+                    src="{{ url_for('static', filename=metrics.images.importancia) }}"
+                    alt="Árbol de decisión: Importancia de variables"
+                    class="chart-image"
+                >
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
