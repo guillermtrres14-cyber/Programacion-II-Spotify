@@ -1,33 +1,83 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Spotify ML Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
 
-{% block title %}Inicio · Spotify ML{% endblock %}
-{% block top_title %}Resumen general{% endblock %}
+<body>
 
-{% block content %}
-<section class="hero">
-    <div>
-        <h1 class="hero-title">
-            Dashboard de <span class="highlight">Machine Learning</span> para Spotify 2024
-        </h1>
-        <p class="hero-subtitle">
-            Explora modelos de regresión, árboles de decisión, clustering y
-            análisis de sentimiento sobre datos reales de streaming global.
-        </p>
+<div class="page">
 
-        <div class="hero-actions">
-            <a href="{{ url_for('vista_regresion') }}" class="btn btn-primary">Empezar por Regresión</a>
-            <a href="{{ url_for('vista_dataset') }}" class="btn btn-ghost">Ver Dataset</a>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">ML</div>
+            <div>
+                <div class="logo-text-main">Spotify</div>
+                <div class="logo-text-sub">ML Dashboard</div>
+            </div>
         </div>
-    </div>
 
-    <div class="hero-panel">
-        <h3>Modelos disponibles</h3>
-        <ul class="hero-list">
-            <li>📈 Predicción de streams con Regresión Lineal.</li>
-            <li>🌳 Interpretabilidad con Árbol de Decisión.</li>
-            <li>🧩 Segmentación de patrones con K-means.</li>
-            <li>💬 Opinión de usuarios con Análisis de Sentimiento.</li>
-        </ul>
-    </div>
-</section>
-{% endblock %}
+        <div class="nav-links">
+            <a href="/" class="active">🏠 Inicio</a>
+            <a href="/regresion">📈 Regresión Lineal</a>
+            <a href="/arbol">🌳 Árbol de Decisión</a>
+            <a href="/kmeans">🧬 K-means</a>
+            <a href="/sentimientos">💬 Sentimiento</a>
+            <a href="/dataset">📊 Dataset</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+
+        <div class="hero-text">
+            <div class="eyebrow"><span></span> Proyecto 2024 · ML</div>
+
+            <h1 class="hero-title">
+                Dashboard de <span class="hero-highlight">Machine Learning</span><br>
+                para Spotify 2024
+            </h1>
+
+            <p class="hero-subtitle">
+                Explora modelos de regresión, árboles de decisión, clustering y análisis de sentimiento sobre datos reales de streaming global.
+            </p>
+
+            <!-- BOTONES MODERNOS -->
+            <div class="botonera-central">
+                <a href="/regresion" class="btn-modern primary">Empezar por Regresión</a>
+                <a href="/dataset" class="btn-modern secondary">Ver Dataset</a>
+                <a href="/sentimientos" class="btn-modern sentiment">Analizar Sentimiento</a>
+            </div>
+        </div>
+
+        <!-- PANEL LATERAL -->
+        <div class="hero-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">Modelos disponibles</div>
+                    <div class="panel-subtitle">Explora cada modelo paso a paso.</div>
+                </div>
+                <div class="panel-chip">ML 2024</div>
+            </div>
+
+            <div class="metrics-grid">
+                <div><span class="metric-label">Regresión Lineal</span><br><span class="metric-value">📈 Predicción</span></div>
+                <div><span class="metric-label">Árbol</span><br><span class="metric-value">🌳 Interpretabilidad</span></div>
+                <div><span class="metric-label">K-means</span><br><span class="metric-value">🧬 Segmentación</span></div>
+                <div><span class="metric-label">Sentimiento</span><br><span class="metric-value">💬 Opinión</span></div>
+            </div>
+
+            <div class="panel-footer">
+                Basado en datos reales de Spotify 2024.
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+</body>
+</html>
