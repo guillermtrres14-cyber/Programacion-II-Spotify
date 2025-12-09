@@ -20,8 +20,20 @@ DATA_PATH = os.path.join(BASE_DIR, "data", "Spotify_2024_Global_Streaming_Data.c
 @app.route("/")
 def index():
     """
-    Página principal del dashboard.
-    Ejecuta la regresión lineal y envía los resultados al index.
+    Página principal: solo muestra el dashboard vacío
+    (sin ejecutar ningún modelo todavía).
+    """
+    return render_template("index.html")
+
+
+# ============================
+#   VISTA REGRESIÓN LINEAL
+# ============================
+@app.route("/regresion")
+def vista_regresion():
+    """
+    Se ejecuta cuando el usuario hace clic en
+    'Ejecutar Regresión de Streams'.
     """
     results = run_regression_model()
     return render_template(
@@ -32,27 +44,13 @@ def index():
 
 
 # ============================
-#   VISTA EXPLÍCITA REGRESIÓN
-#   (para el link vista_regresion del index.html)
-# ============================
-@app.route("/regresion")
-def vista_regresion():
-    """
-    Endpoint usado por url_for('vista_regresion') en index.html.
-    Puedes redirigir a la página principal o volver a ejecutar la regresión.
-    Aquí simplemente redirigimos al index.
-    """
-    return redirect(url_for("index"))
-
-
-# ============================
 #     ÁRBOL DE DECISIÓN
 # ============================
 @app.route("/arbol")
 def vista_arbol():
     """
-    Ejecuta el modelo de Árbol de Decisión y muestra sus métricas
-    reutilizando la plantilla index.html.
+    Ejecuta el modelo de Árbol de Decisión y muestra sus métricas.
+    Más adelante puedes hacer que use otra plantilla o sección.
     """
     metrics = run_arbol(DATA_PATH)
     return render_template(
@@ -68,7 +66,7 @@ def vista_arbol():
 @app.route("/kmeans")
 def vista_kmeans():
     """
-    Ejecuta el modelo K-means y muestra sus métricas en la misma plantilla.
+    Ejecuta el modelo K-means y muestra sus métricas.
     """
     metrics = run_kmeans(DATA_PATH)
     return render_template(
