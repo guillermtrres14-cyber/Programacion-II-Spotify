@@ -422,13 +422,7 @@ def index():
 @app.route("/regresion")
 def vista_regresion():
     imagenes, metricas, error = generar_graficas_regresion()
-    return render_template(
-        "regresion.html",
-        imagenes=imagenes,
-        metricas=metricas,
-        error=error,
-    )
-
+    return render_template("regresion.html", imagenes=imagenes, metricas=metricas, error=error)
 
 @app.route("/arbol")
 def vista_arbol():
