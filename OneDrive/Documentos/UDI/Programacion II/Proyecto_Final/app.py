@@ -2,8 +2,8 @@ from wordcloud import WordCloud
 from nltk.corpus import stopwords
 import re
 from collections import Counter
+import nltk
 
-STOPWORDS_ES = set(stopwords.words("spanish"))
 STOPWORDS_EXTRA = {"spotify", "app", "aplicación", "funciona", "función"}
 STOPWORDS = STOPWORDS_ES.union(STOPWORDS_EXTRA)
 
@@ -50,6 +50,21 @@ COLUMNA_SENTIMIENTO = "sentiment"  # positive / neutral / negative, etc.
 # --------------------------------------------------------------------
 # FUNCIONES AUXILIARES
 # --------------------------------------------------------------------
+def cargar_stopwords():
+    try:
+        nltk.data.find("corpora/stopwords")
+    except LookupError:
+        nltk.download("stopwords")
+
+    from nltk.corpus import stopwords
+
+    STOP_ES = set(stopwords.words("spanish"))
+    STOP_EXTRA = {"spotify", "app", "aplicación", "funciona", "función"}
+    return STOP_ES.union(STOP_EXTRA)
+
+STOPWORDS = cargar_stopwords()
+
+
 def df_spotify():
     """Carga el dataset principal de Spotify."""
     return pd.read_csv(RUTA_DATA_SPOTIFY)
