@@ -1,10 +1,11 @@
+# app.py
 import base64
 from io import BytesIO
 
 from flask import Flask, render_template
 import pandas as pd
 import matplotlib
-matplotlib.use("Agg")  # Backend sin ventana gráfica
+matplotlib.use("Agg")  # backend sin ventana gráfica
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
@@ -15,17 +16,19 @@ from sklearn.cluster import KMeans
 app = Flask(__name__)
 
 # --------------------------------------------------------------------
-# CONFIGURACIÓN: RUTAS DE ARCHIVOS Y COLUMNAS  >>> MODIFICA AQUÍ <<<
+# CONFIGURACIÓN – AJUSTA ESTO A TUS ARCHIVOS Y COLUMNAS
 # --------------------------------------------------------------------
-RUTA_DATA_SPOTIFY = "data/Spotify_2024_Global_Streaming_Data.csv"  # cambia si está en otro lugar
-# Nombres de columnas numéricas que EXISTEN en tu CSV
-COLUMNA_STREAMS = "streams"          # y
-COLUMNA_FEATURE_X = "danceability"   # x1
-COLUMNA_FEATURE_X2 = "energy"        # x2 (para árbol y kmeans)
+# CSV principal de Spotify (streams + features)
+RUTA_DATA_SPOTIFY = "data/Spotify_2024_Global_Streaming_Data.csv"
 
-# Si tienes un CSV separado de reseñas con sentimientos:
-RUTA_DATA_REVIEWS = "data/spotify_reviews.csv"        # opcional
-COLUMNA_SENTIMIENTO = "sentiment"                     # ej: "positive", "neutral", "negative"
+# nombres de columnas QUE EXISTEN en tu CSV principal
+COLUMNA_STREAMS = "streams"        # columna objetivo
+COLUMNA_FEATURE_X = "danceability" # input para regresión
+COLUMNA_FEATURE_X2 = "energy"      # segunda feature (árbol y k-means)
+
+# CSV de reseñas con sentimientos
+RUTA_DATA_REVIEWS = "data/spotify_reviews.csv"
+COLUMNA_SENTIMIENTO = "sentiment"  # positive / neutral / negative, etc.
 
 
 # --------------------------------------------------------------------
@@ -33,12 +36,11 @@ COLUMNA_SENTIMIENTO = "sentiment"                     # ej: "positive", "neutral
 # --------------------------------------------------------------------
 def df_spotify():
     """Carga el dataset principal de Spotify."""
-    df = pd.read_csv(RUTA_DATA_SPOTIFY)
-    return df
+    return pd.read_csv(RUTA_DATA_SPOTIFY)
 
 
 def fig_to_base64(fig):
-    """Convierte una figura de matplotlib a cadena base64 para usar en <img>."""
+    """Convierte una figura matplotlib a base64 para incrustarla en <img>."""
     buffer = BytesIO()
     fig.savefig(buffer, format="png", bbox_inches="tight")
     buffer.seek(0)
@@ -47,7 +49,7 @@ def fig_to_base64(fig):
     return base64.b64encode(img_png).decode("utf-8")
 
 
-# ----------------------------- REGRESIÓN -----------------------------
+# ------------------------- REGRESIÓN LINEAL ------------------------- #
 def grafico_regresion_y_metricas():
     df = df_spotify()
 
@@ -64,7 +66,6 @@ def grafico_regresion_y_metricas():
     y_pred = modelo.predict(X_test)
     r2 = modelo.score(X_test, y_test)
 
-    # Gráfico
     fig, ax = plt.subplots()
     ax.scatter(X_test, y_test, alpha=0.5, label="Real")
     ax.plot(X_test, y_pred, linewidth=2, label="Predicción")
@@ -76,13 +77,11 @@ def grafico_regresion_y_metricas():
     img64 = fig_to_base64(fig)
     plt.close(fig)
 
-    metricas = {
-        "r2": round(r2, 4)
-    }
+    metricas = {"r2": round(r2, 4)}
     return img64, metricas
 
 
-# ----------------------------- ÁRBOL DECISIÓN -----------------------------
+# ------------------------ ÁRBOL DE DECISIÓN ------------------------ #
 def grafico_arbol_y_metricas():
     df = df_spotify()
 
@@ -98,7 +97,6 @@ def grafico_arbol_y_metricas():
 
     score = arbol.score(X_test, y_test)
 
-    # Gráfico del árbol
     fig, ax = plt.subplots(figsize=(10, 6))
     plot_tree(
         arbol,
@@ -108,28 +106,30 @@ def grafico_arbol_y_metricas():
         fontsize=6,
         ax=ax
     )
-    ax.set_title("Árbol de decisión - Predicción de Streams")
+    ax.set_title("Árbol de decisión - Predicción de streams")
 
     img64 = fig_to_base64(fig)
     plt.close(fig)
 
-    metricas = {
-        "r2": round(score, 4)
-    }
+    metricas = {"r2": round(score, 4)}
     return img64, metricas
 
 
-# ----------------------------- K-MEANS -----------------------------
+# ----------------------------- K-MEANS ------------------------------ #
 def grafico_kmeans():
     df = df_spotify()
-
     X = df[[COLUMNA_FEATURE_X, COLUMNA_FEATURE_X2]]
 
     kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
     clusters = kmeans.fit_predict(X)
 
     fig, ax = plt.subplots()
-    scatter = ax.scatter(X[COLUMNA_FEATURE_X], X[COLUMNA_FEATURE_X2], c=clusters, alpha=0.6)
+    scatter = ax.scatter(
+        X[COLUMNA_FEATURE_X],
+        X[COLUMNA_FEATURE_X2],
+        c=clusters,
+        alpha=0.6
+    )
     centers = kmeans.cluster_centers_
     ax.scatter(centers[:, 0], centers[:, 1], s=200, marker="X")
 
@@ -143,16 +143,16 @@ def grafico_kmeans():
     return img64
 
 
-# ----------------------------- SENTIMIENTO -----------------------------
+# ------------------------ ANÁLISIS DE SENTIMIENTO ------------------- #
 def grafico_sentimiento():
     """
     Lee un CSV de reseñas con una columna de sentimiento
     y genera un gráfico de barras con la distribución.
-    Si el archivo no existe o falla, devuelve None.
     """
     try:
         df = pd.read_csv(RUTA_DATA_REVIEWS)
     except Exception:
+        # si no existe el archivo o hay error, devolvemos None
         return None
 
     conteo = df[COLUMNA_SENTIMIENTO].value_counts()
@@ -243,5 +243,32 @@ def vista_sentimiento():
     )
 
 
+@app.route("/dataset")
+def vista_dataset():
+    """
+    Vista del dataset para que el enlace del menú no falle.
+    Muestra las primeras filas de la tabla.
+    """
+    try:
+        df = df_spotify()
+        tabla_html = df.head(50).to_html(
+            classes="table table-striped table-sm",
+            index=False
+        )
+        error = None
+    except Exception as e:
+        tabla_html = None
+        error = str(e)
+
+    return render_template(
+        "dataset.html",
+        tabla_html=tabla_html,
+        error=error
+    )
+
+
+# --------------------------------------------------------------------
+# MAIN
+# --------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
