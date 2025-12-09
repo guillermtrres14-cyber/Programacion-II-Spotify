@@ -1,18 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="text-3xl font-bold mb-2">Resultados del modelo de Regresión Lineal</h1>
-<p class="mb-4">Modelo entrenado sobre el dataset Spotify 2024 Global Streaming.</p>
+
+<h1 class="text-4xl font-bold mb-2">Regresión Lineal</h1>
+<p class="mb-4 text-lg">Modelo para predecir streams a partir de {{ COLUMNA_FEATURE_X if COLUMNA_FEATURE_X is defined else 'una característica' }}.</p>
 
 {% if error %}
-  <p class="text-red-500">Error: {{ error }}</p>
-{% elif grafico_regresion %}
-  <div style="text-align:center;">
-    <img src="data:image/png;base64,{{ grafico_regresion }}" alt="Gráfico regresión" style="max-width:100%; border-radius:12px;">
-  </div>
-  {% if metricas %}
-    <p class="mt-4">R² del modelo: <strong>{{ metricas.r2 }}</strong></p>
-  {% endif %}
+  <p class="text-red-500">{{ error }}</p>
 {% else %}
-  <p class="text-red-500">No se pudieron calcular las métricas de regresión.</p>
+
+<p class="mb-4">
+  <strong>R²:</strong> {{ metricas.r2 }} ·
+  <strong>MAE:</strong> {{ metricas.mae }} ·
+  <strong>RMSE:</strong> {{ metricas.rmse }}
+</p>
+
+<h2 class="text-2xl font-bold mt-4 mb-2">Modelo y recta de regresión</h2>
+<img src="data:image/png;base64,{{ imagenes.modelo }}" class="rounded-lg shadow-lg" style="max-width:600px;">
+
+<h2 class="text-2xl font-bold mt-6 mb-2">Distribución de residuos</h2>
+<img src="data:image/png;base64,{{ imagenes.residuos }}" class="rounded-lg shadow-lg" style="max-width:600px;">
+
+<h2 class="text-2xl font-bold mt-6 mb-2">Streams reales vs predichos</h2>
+<img src="data:image/png;base64,{{ imagenes.real_vs_pred }}" class="rounded-lg shadow-lg" style="max-width:600px;">
+
 {% endif %}
+
 {% endblock %}

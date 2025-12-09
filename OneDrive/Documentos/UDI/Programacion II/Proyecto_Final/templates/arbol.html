@@ -1,18 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="text-3xl font-bold mb-2">Árbol de Decisión</h1>
-<p class="mb-4">Modelo interpretable para entender qué factores explican los streams.</p>
+
+<h1 class="text-4xl font-bold mb-2">Árbol de Decisión</h1>
+<p class="mb-4 text-lg">Modelo interpretable para entender qué factores explican los streams.</p>
 
 {% if error %}
-  <p class="text-red-500">Error: {{ error }}</p>
-{% elif grafico_arbol %}
-  <div style="text-align:center;">
-    <img src="data:image/png;base64,{{ grafico_arbol }}" alt="Árbol de decisión" style="max-width:100%; border-radius:12px;">
-  </div>
-  {% if metricas %}
-    <p class="mt-4">R² del modelo: <strong>{{ metricas.r2 }}</strong></p>
-  {% endif %}
+  <p class="text-red-500">{{ error }}</p>
 {% else %}
-  <p class="text-red-500">No se pudieron calcular las métricas del Árbol de Decisión.</p>
+
+<p class="mb-4">
+  <strong>R²:</strong> {{ metricas.r2 }} ·
+  <strong>Profundidad:</strong> {{ metricas.profundidad }} ·
+  <strong>Nodos:</strong> {{ metricas.n_nodos }}
+</p>
+
+<h2 class="text-2xl font-bold mt-4 mb-2">Estructura del Árbol</h2>
+<img src="data:image/png;base64,{{ imagenes.arbol }}" class="rounded-lg shadow-lg" style="max-width:1000px;">
+
+<h2 class="text-2xl font-bold mt-6 mb-2">Importancia de Variables</h2>
+<img src="data:image/png;base64,{{ imagenes.importancias }}" class="rounded-lg shadow-lg" style="max-width:600px;">
+
 {% endif %}
+
 {% endblock %}
