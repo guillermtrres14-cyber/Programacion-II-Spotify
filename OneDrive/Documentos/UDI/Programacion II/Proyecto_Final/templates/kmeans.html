@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}K-means · Spotify ML{% endblock %}
+{% block top_title %}K-means – Segmentación de patrones{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <h2>Clustering K-means</h2>
+    <p>Agrupa canciones o artistas según su comportamiento de escucha.</p>
+</section>
+
+{% if metrics and metrics.ok %}
+<section class="metrics-row">
+    <div class="metric-card">
+        <span class="metric-label">Clusters</span>
+        <span class="metric-value">{{ metrics.n_clusters }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Inercia</span>
+        <span class="metric-value">{{ metrics.inercia }}</span>
+    </div>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <h3>Clusters en espacio reducido (PCA)</h3>
+        <img src="{{ url_for('static', filename=metrics.images.clusters_pca) }}"
+             alt="Clusters PCA"
+             class="chart-image">
+    </article>
+
+    <article class="chart-card">
+        <h3>Tamaño de los clusters</h3>
+        <img src="{{ url_for('static', filename=metrics.images.tamaño_clusters) }}"
+             alt="Tamaño clusters"
+             class="chart-image">
+    </article>
+</section>
+{% else %}
+<p class="error-text">
+    No se pudieron calcular los clusters K-means.
+    {% if metrics and metrics.error %} {{ metrics.error }}{% endif %}
+</p>
+{% endif %}
+{% endblock %}
