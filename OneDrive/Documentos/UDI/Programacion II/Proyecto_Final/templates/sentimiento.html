@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Sentimiento · Spotify ML{% endblock %}
+{% block top_title %}Análisis de Sentimiento – Reseñas Spotify{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <h2>Análisis de Sentimiento</h2>
+    <p>Distribución de opiniones y palabras clave en las reseñas de usuarios.</p>
+</section>
+
+{% if sentimiento and sentimiento.ok %}
+<section class="metrics-row">
+    <div class="metric-card">
+        <span class="metric-label">Total reseñas</span>
+        <span class="metric-value">{{ sentimiento.total_reviews }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Dominante</span>
+        <span class="metric-value">{{ sentimiento.sentiment_dominante }}</span>
+    </div>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <h3>Distribución del sentimiento</h3>
+        <img src="{{ url_for('static', filename=sentimiento.images.pie) }}"
+             class="chart-image" alt="Distribución sentimiento">
+    </article>
+
+    <article class="chart-card">
+        <h3>Score promedio por categoría</h3>
+        <img src="{{ url_for('static', filename=sentimiento.images.bar) }}"
+             class="chart-image" alt="Score promedio">
+    </article>
+
+    <article class="chart-card">
+        <h3>Nube de palabras</h3>
+        <img src="{{ url_for('static', filename=sentimiento.images.wc) }}"
+             class="chart-image" alt="Wordcloud">
+    </article>
+
+    <article class="chart-card">
+        <h3>Palabras más mencionadas</h3>
+        <img src="{{ url_for('static', filename=sentimiento.images.top_words) }}"
+             class="chart-image" alt="Top palabras">
+    </article>
+</section>
+{% else %}
+<p class="error-text">
+    No se pudo procesar el análisis de sentimiento.
+    {% if sentimiento and sentimiento.error %} {{ sentimiento.error }}{% endif %}
+</p>
+{% endif %}
+{% endblock %}
