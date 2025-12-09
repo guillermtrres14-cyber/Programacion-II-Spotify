@@ -1,3 +1,10 @@
+RUTA_DATA_SPOTIFY = "data/Spotify_2024_Global_Streaming_Data.csv"
+
+# ✅ OJO: así se llaman en el CSV de Kaggle
+COLUMNA_STREAMS = "streams"          # objetivo
+COLUMNA_FEATURE_X = "danceability_%" # para regresión (eje X)
+COLUMNA_FEATURE_X2 = "energy_%"      # segunda feature (árbol y k-means)
+
 # app.py
 import base64
 from io import BytesIO
