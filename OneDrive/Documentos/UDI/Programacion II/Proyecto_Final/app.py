@@ -4,12 +4,13 @@ import re
 from collections import Counter
 import nltk
 
+# CSV principal de Spotify (tu archivo actual)
 RUTA_DATA_SPOTIFY = "data/Spotify_2024_Global_Streaming_Data.csv"
 
-# ✅ OJO: así se llaman en el CSV de Kaggle
-COLUMNA_STREAMS = "streams"          # objetivo
-COLUMNA_FEATURE_X = "danceability_%" # para regresión (eje X)
-COLUMNA_FEATURE_X2 = "energy_%"      # segunda feature (árbol y k-means)
+# >>>> NOMBRES REALES SEGÚN TU CSV <<<<
+COLUMNA_STREAMS = "Total Streams (Millions)"          # objetivo y
+COLUMNA_FEATURE_X = "Monthly Listeners (Millions)"    # X1
+COLUMNA_FEATURE_X2 = "Streams Last 30 Days (Millions)"  # X2
 
 # app.py
 import base64
