@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Spotify ML Dashboard 2024</title>
 
+    <!-- Fuentes y estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -49,26 +50,30 @@
             </h1>
 
             <p class="hero-subtitle">
-                Esta plataforma permite ejecutar modelos de Regresión Lineal,
-                Árbol de Decisión, K-means y Análisis de Sentimiento usando datos reales de Spotify.
+                Esta plataforma permite ejecutar modelos de
+                <strong>Regresión Lineal</strong>,
+                <strong>Árbol de Decisión</strong>,
+                <strong>K-means</strong>
+                y <strong>Análisis de Sentimiento</strong>,
+                usando datos reales del streaming global.
             </p>
 
-            <!-- BOTONES PRINCIPALES -->
+            <!-- ⭐ BOTONES PRINCIPALES (CORREGIDOS) -->
             <div class="hero-actions">
                 <a href="{{ url_for('vista_regresion') }}" class="btn-primary">
                     Ejecutar Regresión de Streams
                 </a>
+
                 <a href="{{ url_for('vista_dataset') }}" class="btn-ghost">
                     Ver muestra del Dataset
                 </a>
-            </div>
 
-            <!-- AQUÍ ESTÁ EL BOTÓN CORREGIDO -->
-            <div class="hero-actions">
+                <!-- MISMO ESTILO VERDE QUE LOS OTROS -->
                 <a href="{{ url_for('vista_sentimiento') }}" class="btn-primary">
                     Analizar Sentimiento
                 </a>
             </div>
+
         </div>
 
         <!-- PANEL DERECHA DE MÉTRICAS -->
@@ -97,21 +102,11 @@
 
             {% if metrics and metrics.ok %}
                 <div class="metrics-grid">
-                    {% if metrics.R2 %}
-                        <div><div class="metric-label">R²</div><div class="metric-value">{{ metrics.R2 }}</div></div>
-                    {% endif %}
-                    {% if metrics.MSE %}
-                        <div><div class="metric-label">MSE</div><div class="metric-value">{{ metrics.MSE }}</div></div>
-                    {% endif %}
-                    {% if metrics.MAE %}
-                        <div><div class="metric-label">MAE</div><div class="metric-value">{{ metrics.MAE }}</div></div>
-                    {% endif %}
-                    {% if metrics.n_clusters %}
-                        <div><div class="metric-label">Clusters</div><div class="metric-value">{{ metrics.n_clusters }}</div></div>
-                    {% endif %}
-                    {% if metrics.inercia %}
-                        <div><div class="metric-label">Inercia</div><div class="metric-value">{{ metrics.inercia }}</div></div>
-                    {% endif %}
+                    {% if metrics.R2 %}<div><div class="metric-label">R²</div><div class="metric-value">{{ metrics.R2 }}</div></div>{% endif %}
+                    {% if metrics.MSE %}<div><div class="metric-label">MSE</div><div class="metric-value">{{ metrics.MSE }}</div></div>{% endif %}
+                    {% if metrics.MAE %}<div><div class="metric-label">MAE</div><div class="metric-value">{{ metrics.MAE }}</div></div>{% endif %}
+                    {% if metrics.n_clusters %}<div><div class="metric-label">Clusters</div><div class="metric-value">{{ metrics.n_clusters }}</div></div>{% endif %}
+                    {% if metrics.inercia %}<div><div class="metric-label">Inercia</div><div class="metric-value">{{ metrics.inercia }}</div></div>{% endif %}
                 </div>
             {% else %}
                 <div class="panel-footer">
@@ -120,6 +115,99 @@
             {% endif %}
         </aside>
     </section>
+
+
+
+    <!-- =====================
+          VISUALIZACIONES
+       ===================== -->
+
+    <!-- REGRESIÓN LINEAL -->
+    {% if selected_model == "Regresión Lineal" and results and results.ok %}
+    <section class="charts-section">
+        <h2 class="section-title">Regresión Lineal</h2>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Scatter + Línea de Regresión</h3>
+                <img src="{{ url_for('static', filename=results.images.scatter) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Importancia de Variables</h3>
+                <img src="{{ url_for('static', filename=results.images.importancia) }}" class="chart-image">
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ÁRBOL DE DECISIÓN -->
+    {% if selected_model == "Árbol de Decisión" and metrics and metrics.ok %}
+    <section class="charts-section">
+        <h2 class="section-title">Árbol de Decisión</h2>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Reales vs Predichos</h3>
+                <img src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Importancia de Variables</h3>
+                <img src="{{ url_for('static', filename=metrics.images.importancia) }}" class="chart-image">
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- K-MEANS -->
+    {% if selected_model == "K-means" and metrics and metrics.ok %}
+    <section class="charts-section">
+        <h2 class="section-title">K-means Clustering</h2>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Clusters (PCA)</h3>
+                <img src="{{ url_for('static', filename=metrics.images.clusters_pca) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Tamaño de Clusters</h3>
+                <img src="{{ url_for('static', filename=metrics.images.tamaño_clusters) }}" class="chart-image">
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ANÁLISIS DE SENTIMIENTO -->
+    {% if sentimiento and sentimiento.ok %}
+    <section class="charts-section">
+        <h2 class="section-title">Análisis de Sentimiento</h2>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Distribución del Sentimiento</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.pie) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Score Promedio</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.bar) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Nube de Palabras</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.wc) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Palabras Más Usadas</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.top_words) }}" class="chart-image">
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
 </div>
 </body>
 </html>
