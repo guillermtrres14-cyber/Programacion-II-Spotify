@@ -1,11 +1,56 @@
-{% if not error %}
-  <p>MSE: {{ metricas.mse }} · MAE: {{ metricas.mae }} · R²: {{ metricas.r2 }}</p>
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Regresión Lineal</h1>
+
+<p>Modelo para predecir streams a partir de variables reales del dataset.</p>
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+{% if imagenes %}
 
 <h2>Oyentes mensuales vs Streams</h2>
-<img src="data:image/png;base64,{{ imagenes.scatter_listeners }}" />
+{% if imagenes.scatter_listeners %}
+<img src="data:image/png;base64,{{ imagenes.scatter_listeners }}" class="img-fluid">
+{% endif %}
 
 <h2>Intensidad de escucha vs Streams</h2>
-<img src="data:image/png;base64,{{ imagenes.scatter_intensidad }}" />
-<img src="data:image/png;base64,{{ imagenes.modelo }}">
-<img src="data:image/png;base64,{{ imagenes.real_vs_pred }}">
-<img src="data:image/png;base64,{{ imagenes.residuos }}">
+{% if imagenes.scatter_intensidad %}
+<img src="data:image/png;base64,{{ imagenes.scatter_intensidad }}" class="img-fluid">
+{% endif %}
+
+<hr>
+
+<h2>Regresión: Línea de tendencia</h2>
+{% if imagenes.modelo %}
+<img src="data:image/png;base64,{{ imagenes.modelo }}" class="img-fluid">
+{% endif %}
+
+<h2>Real vs Predicho</h2>
+{% if imagenes.real_vs_pred %}
+<img src="data:image/png;base64,{{ imagenes.real_vs_pred }}" class="img-fluid">
+{% endif %}
+
+<h2>Distribución de residuos</h2>
+{% if imagenes.residuos %}
+<img src="data:image/png;base64,{{ imagenes.residuos }}" class="img-fluid">
+{% endif %}
+
+<hr>
+
+{% if metricas %}
+<h2>Métricas del modelo</h2>
+<ul>
+    <li><strong>MSE:</strong> {{ metricas.mse }}</li>
+    <li><strong>MAE:</strong> {{ metricas.mae }}</li>
+    <li><strong>R²:</strong> {{ metricas.r2 }}</li>
+</ul>
+{% endif %}
+
+{% endif %}
+
+{% endblock %}
