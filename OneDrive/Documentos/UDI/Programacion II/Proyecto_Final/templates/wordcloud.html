@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Nube de Palabras</h1>
+
+{% if error %}
+<p class="text-red-500">{{ error }}</p>
+{% else %}
+<img src="data:image/png;base64,{{ grafico }}" style="max-width:100%;">
+{% endif %}
+{% endblock %}
