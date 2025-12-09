@@ -40,7 +40,7 @@ def vista_kmeans():
 @app.route("/sentimiento")
 def vista_sentimiento():
     sentimiento = run_sentimiento(REVIEWS_PATH)
-    return render_template(
+    return render_template
         "index.html",
         sentimiento=sentimiento,
         selected_model="Análisis de Sentimiento"
