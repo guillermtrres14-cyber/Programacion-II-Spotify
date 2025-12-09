@@ -1,55 +1,9 @@
 {% extends "base.html" %}
-
-{% block title %}Árbol de Decisión · Spotify ML{% endblock %}
-{% block top_title %}Árbol de Decisión – Interpretabilidad{% endblock %}
-
 {% block content %}
-<section class="section-header">
-    <h2>Árbol de Decisión</h2>
-    <p>Modelo interpretable para entender qué factores explican los streams.</p>
-</section>
+<h1 class="text-3xl font-bold mb-4">Árbol de Decisión</h1>
+<p class="mb-4">Modelo interpretable para entender qué factores explican los streams.</p>
 
-{% if metrics and metrics.ok %}
-<section class="metrics-row">
-    {% if metrics.R2 %}
-    <div class="metric-card">
-        <span class="metric-label">R²</span>
-        <span class="metric-value">{{ metrics.R2 }}</span>
-    </div>
-    {% endif %}
-    {% if metrics.MSE %}
-    <div class="metric-card">
-        <span class="metric-label">MSE</span>
-        <span class="metric-value">{{ metrics.MSE }}</span>
-    </div>
-    {% endif %}
-    {% if metrics.MAE %}
-    <div class="metric-card">
-        <span class="metric-label">MAE</span>
-        <span class="metric-value">{{ metrics.MAE }}</span>
-    </div>
-    {% endif %}
-</section>
-
-<section class="charts-grid">
-    <article class="chart-card">
-        <h3>Streams reales vs predichos</h3>
-        <img src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}"
-             alt="Real vs Predicho"
-             class="chart-image">
-    </article>
-
-    <article class="chart-card">
-        <h3>Importancia de variables</h3>
-        <img src="{{ url_for('static', filename=metrics.images.importancia) }}"
-             alt="Importancia variables árbol"
-             class="chart-image">
-    </article>
-</section>
-{% else %}
-<p class="error-text">
-    No se pudieron calcular las métricas del Árbol de Decisión.
-    {% if metrics and metrics.error %} {{ metrics.error }}{% endif %}
-</p>
-{% endif %}
+<div class="flex justify-center">
+  <img src="{{ img_arbol }}" alt="Árbol de decisión" class="max-w-full rounded-lg shadow-lg">
+</div>
 {% endblock %}
