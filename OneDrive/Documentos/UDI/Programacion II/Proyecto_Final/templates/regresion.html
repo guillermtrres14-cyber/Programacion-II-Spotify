@@ -1,9 +1,16 @@
 {% extends "base.html" %}
-{% block content %}
-<h1 class="text-3xl font-bold mb-4">Resultados del modelo de Regresión Lineal</h1>
-<p class="mb-4">Modelo entrenado sobre el dataset Spotify 2024 Global Streaming.</p>
 
-<div class="flex justify-center">
-  <img src="{{ img_regresion }}" alt="Gráfico de regresión lineal" class="max-w-full rounded-lg shadow-lg">
+{% block title %}Regresión Lineal – Spotify 2024 ML{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-2">Resultados del modelo de Regresión Lineal</h1>
+<p class="mb-4">
+    Modelo entrenado sobre el dataset Spotify 2024 Global Streaming.
+</p>
+
+<div style="text-align:center; margin-top: 20px;">
+    <img src="{{ img_regresion }}"
+         alt="Gráfico de regresión lineal"
+         style="max-width: 100%; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
 </div>
 {% endblock %}
