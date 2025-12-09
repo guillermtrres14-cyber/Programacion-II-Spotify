@@ -1,129 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}Spotify ML Dashboard{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify ML Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FUENTE BONITA -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0e0e0e;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ============================ */
+        /* NAVBAR SUPERIOR ESTILO PRO   */
+        /* ============================ */
+        .top-menu {
+            display: flex;
+            gap: 1.8rem;
+            padding: 1.2rem 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .menu-link {
+            position: relative;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            font-size: 1rem;
+            padding-bottom: 4px;
+        }
+
+        .menu-link:visited {
+            color: #ffffff !important;
+        }
+
+        /* Línea degradada debajo */
+        .menu-link::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 0;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #00f5ff, #00ff87, #ffd54f);
+            transition: width 0.25s ease-in-out;
+        }
+
+        /* Hover y activo */
+        .menu-link:hover::after,
+        .menu-link.active::after {
+            width: 100%;
+        }
+
+        /* ============================ */
+        /* CONTENIDO PRINCIPAL          */
+        /* ============================ */
+        .content {
+            max-width: 1200px;
+            margin: auto;
+            padding: 2rem;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+
+        img {
+            margin: 1rem 0;
+            border-radius: 8px;
+            max-width: 100%;
+        }
+
+    </style>
 </head>
 
-<style>
-  .navbar {
-    display: flex;
-    justify-content: center;
-    padding: 1rem 0;
-  }
-
-  .nav-links {
-    list-style: none;
-    display: flex;
-    gap: 2rem;
-    margin: 0;
-    padding: 0;
-  }
-
-  .nav-link {
-    position: relative;
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 0.95rem;
-    letter-spacing: 0.03em;
-    padding-bottom: 4px;
-  }
-
-  .nav-link::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -3px;
-    width: 0;
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #00f5ff, #00ff87, #ffd54f);
-    transition: width 0.25s ease-in-out;
-  }
-
-  .nav-link:hover::after,
-  .nav-link.active::after {
-    width: 100%;
-  }
-
-  .nav-link:hover {
-    color: #ffffff;
-  }
-</style>
-
 <body>
-<div class="layout">
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">ML</div>
-            <div class="sidebar-title">Spotify<br><span>ML Dashboard</span></div>
-        </div>
+    <!-- ============================ -->
+    <!--        MENÚ SUPERIOR         -->
+    <!-- ============================ -->
+    <nav class="top-menu">
 
-        <nav class="sidebar-menu">
-            <a href="{{ url_for('index') }}" class="sidebar-link">
-                <span class="icon">🏠</span><span class="text">Inicio</span>
-            </a>
-            <a href="{{ url_for('vista_regresion') }}" class="sidebar-link">
-                <span class="icon">📈</span><span class="text">Regresión Lineal</span>
-            </a>
-            <a href="{{ url_for('vista_arbol') }}" class="sidebar-link">
-                <span class="icon">🌳</span><span class="text">Árbol de Decisión</span>
-            </a>
-            <a href="{{ url_for('vista_kmeans') }}" class="sidebar-link">
-                <span class="icon">🧩</span><span class="text">K-means</span>
-            </a>
-            <a href="{{ url_for('vista_sentimiento') }}" class="sidebar-link">
-                <span class="icon">💬</span><span class="text">Sentimiento</span>
-            </a>
-            <a href="{{ url_for('vista_dataset') }}" class="sidebar-link">
-                <span class="icon">📊</span><span class="text">Dataset</span>
-            </a>
-        </nav>
+        <a href="{{ url_for('index') }}"
+           class="menu-link {% if request.path == url_for('index') %}active{% endif %}">
+            🏠Inicio
+        </a>
 
-        <div class="sidebar-footer">
-            <span>Proyecto 2024</span>
-        </div>
-    </aside>
+        <a href="{{ url_for('vista_regresion') }}"
+           class="menu-link {% if request.path == url_for('vista_regresion') %}active{% endif %}">
+            📈Regresión Lineal
+        </a>
 
-    <!-- MAIN -->
-    <div class="main">
+        <a href="{{ url_for('vista_arbol') }}"
+           class="menu-link {% if request.path == url_for('vista_arbol') %}active{% endif %}">
+            🌳Árbol de Decisión
+        </a>
 
-        <!-- TOPBAR -->
-        <header class="topbar">
-            <button id="btn-toggle" class="burger" aria-label="Alternar menú">
-                <span></span><span></span><span></span>
-            </button>
+        <a href="{{ url_for('vista_kmeans') }}"
+           class="menu-link {% if request.path == url_for('vista_kmeans') %}active{% endif %}">
+            🧩K-means
+        </a>
 
-            <div class="topbar-title">
-                {% block top_title %}Spotify ML Dashboard{% endblock %}
-            </div>
+        <a href="{{ url_for('vista_sentimiento') }}"
+           class="menu-link {% if request.path == url_for('vista_sentimiento') %}active{% endif %}">
+            💬Sentimiento
+        </a>
 
-            <div class="topbar-right">
-                <span class="pill">Spotify 2024 · ML</span>
-            </div>
-        </header>
+        <a href="{{ url_for('vista_dataset') }}"
+           class="menu-link {% if request.path == url_for('vista_dataset') %}active{% endif %}">
+            📊Dataset
+        </a>
 
-        <!-- CONTENIDO -->
-        <main class="content">
-            {% block content %}{% endblock %}
-        </main>
+    </nav>
+
+    <!-- ============================ -->
+    <!--   CONTENIDO DINÁMICO FLASK   -->
+    <!-- ============================ -->
+    <div class="content">
+        {% block content %}
+        {% endblock %}
     </div>
-</div>
 
-<script>
-    const sidebar = document.getElementById('sidebar');
-    const btn = document.getElementById('btn-toggle');
-    btn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-    });
-</script>
 </body>
 </html>
