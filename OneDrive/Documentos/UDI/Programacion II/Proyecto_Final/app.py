@@ -171,144 +171,96 @@ def grafico_kmeans():
 
 
 # ------------------------ ANÁLISIS DE SENTIMIENTO ------------------- #
-def grafico_sentimiento():
+def generar_graficas_sentimiento():
     """
-    Genera un gráfico de barras de sentimiento / score
-    a partir del CSV de reseñas.
-    Usa la columna 'sentiment' si existe; si no, usa 'score'.
-    Devuelve (imagen_base64, mensaje_error).
+    Genera TODAS las gráficas del módulo de sentimiento:
+    - score
+    - longitud comentarios
+    - top palabras
+    - wordcloud
+
+    Devuelve:
+      {
+        "score": base64_img,
+        "longitud": base64_img,
+        "top_palabras": base64_img,
+        "wordcloud": base64_img
+      }
     """
     try:
         df = pd.read_csv(RUTA_DATA_REVIEWS)
-    except Exception:
-        return None, "No se pudo leer el archivo de reseñas en " + RUTA_DATA_REVIEWS
+    except:
+        return None, "No se pudo leer el archivo de reseñas"
 
-    col_sent = None
+    if "content" not in df.columns or "score" not in df.columns:
+        return None, "Faltan columnas necesarias ('content' y 'score')"
 
-    # 1) Preferimos una columna de sentimiento si existe
-    for c in df.columns:
-        cl = c.lower()
-        if "sentiment" in cl or "label" in cl or "polarity" in cl:
-            col_sent = c
-            break
+    imagenes = {}
 
-    # 2) Si no existe, usamos 'score' si está disponible
-    if col_sent is None:
-        if "score" in df.columns:
-            col_sent = "score"
-        else:
-            cols = ", ".join(df.columns)
-            msg = (
-                "No se encontró columna de sentimiento ni 'score'. "
-                f"Columnas disponibles en el CSV: {cols}"
-            )
-            return None, msg
+    # ============ 1) DISTRIBUCIÓN DE SCORE ============
+    conteo_score = df["score"].value_counts().sort_index()
 
-    conteo = df[col_sent].value_counts().sort_index()
+    fig1, ax1 = plt.subplots(figsize=(6,4))
+    conteo_score.plot(kind="bar", ax=ax1)
+    ax1.set_title("Distribución de score")
+    ax1.set_xlabel("Score")
+    ax1.set_ylabel("Número de reseñas")
+    imagenes["score"] = fig_to_base64(fig1)
+    plt.close(fig1)
 
-    fig, ax = plt.subplots()
-    conteo.plot(kind="bar", ax=ax)
-    ax.set_xlabel(col_sent)
-    ax.set_ylabel("Número de reseñas")
-    ax.set_title(f"Distribución de {col_sent} en reseñas de Spotify")
+    # ============ 2) LONGITUD DE COMENTARIOS ============
+    longitudes = df["content"].dropna().astype(str).apply(lambda x: len(x.split()))
 
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
+    fig2, ax2 = plt.subplots(figsize=(6,4))
+    ax2.hist(longitudes, bins=30, color="#3498db", alpha=0.8)
+    ax2.set_title("Distribución de longitud de comentarios")
+    ax2.set_xlabel("Número de palabras")
+    ax2.set_ylabel("Cantidad de reseñas")
+    imagenes["longitud"] = fig_to_base64(fig2)
+    plt.close(fig2)
 
-    return img64, None
-
-def grafico_top_palabras():
-    try:
-        df = pd.read_csv(RUTA_DATA_REVIEWS)
-    except Exception:
-        return None, "No se pudo cargar el archivo de reseñas."
-
-    if "content" not in df.columns:
-        return None, "El CSV no tiene una columna 'content' con los textos."
-
+    # ============ 3) TOP PALABRAS (sin stopwords) ============
     textos = df["content"].dropna().astype(str)
 
-    # Limpiar texto
-    all_words = []
+    todas = []
     for t in textos:
         t = t.lower()
-        t = re.sub(r"[^a-záéíóúñü ]", "", t)
-        palabras = t.split()
-        palabras = [p for p in palabras if p not in STOPWORDS and len(p) > 3]
-        all_words.extend(palabras)
+        t = re.sub(r"[^a-záéíóúñü ]", " ", t)
+        palabras = [p for p in t.split() if p not in STOPWORDS and len(p) > 3]
+        todas.extend(palabras)
 
-    if not all_words:
-        return None, "No se encontraron palabras significativas."
+    if todas:
+        top = Counter(todas).most_common(15)
+        palabras_top, frecs = zip(*top)
 
-    top = Counter(all_words).most_common(15)
+        fig3, ax3 = plt.subplots(figsize=(6,4))
+        ax3.barh(palabras_top[::-1], frecs[::-1])
+        ax3.set_title("Top 15 palabras más mencionadas")
+        ax3.set_xlabel("Frecuencia")
+        imagenes["top_palabras"] = fig_to_base64(fig3)
+        plt.close(fig3)
+    else:
+        imagenes["top_palabras"] = None
 
-    # Gráfico
-    palabras, frecuencias = zip(*top)
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.barh(palabras[::-1], frecuencias[::-1])
-    ax.set_title("Palabras más mencionadas en las reseñas")
-    ax.set_xlabel("Frecuencia")
-
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
-
-    return img64, None
-
-def grafico_wordcloud():
-    try:
-        df = pd.read_csv(RUTA_DATA_REVIEWS)
-    except Exception:
-        return None, "No se pudo cargar el archivo de reseñas."
-
-    if "content" not in df.columns:
-        return None, "El CSV no tiene la columna 'content'."
-
-    textos = df["content"].dropna().astype(str)
-
-    # limpieza
-    texto = " ".join(textos).lower()
-    texto = re.sub(r"[^a-záéíóúñü ]", " ", texto)
-
-    # quitar stopwords
-    for sw in STOPWORDS:
-        texto = texto.replace(f" {sw} ", " ")
+    # ============ 4) WORDCLOUD ============
+    texto_total = " ".join(textos).lower()
+    texto_total = re.sub(r"[^a-záéíóúñü ]", " ", texto_total)
 
     wc = WordCloud(
         width=1200,
         height=600,
         background_color="white",
-        max_words=200,
-        colormap="viridis"
-    ).generate(texto)
+        colormap="viridis",
+        max_words=200
+    ).generate(texto_total)
 
-    fig = plt.figure(figsize=(12, 6))
+    fig4 = plt.figure(figsize=(12,5))
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
+    imagenes["wordcloud"] = fig_to_base64(fig4)
+    plt.close(fig4)
 
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
-    return img64, None
-
-def grafico_longitud_comentarios():
-    try:
-        df = pd.read_csv(RUTA_DATA_REVIEWS)
-    except Exception:
-        return None, "No se pudo cargar el archivo de reseñas."
-
-    if "content" not in df.columns:
-        return None, "No existe la columna 'content'."
-
-    longitudes = df["content"].dropna().astype(str).apply(lambda x: len(x.split()))
-
-    fig, ax = plt.subplots()
-    ax.hist(longitudes, bins=30, color="#3498db", alpha=0.85)
-    ax.set_title("Distribución de longitud de comentarios")
-    ax.set_xlabel("Número de palabras")
-    ax.set_ylabel("Cantidad de reseñas")
-
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
-    return img64, None
+    return imagenes, None
 # --------------------------------------------------------------------
 # RUTAS FLASK
 # --------------------------------------------------------------------
@@ -371,14 +323,11 @@ def vista_kmeans():
 
 @app.route("/sentimiento")
 def vista_sentimiento():
-    grafico, error = grafico_sentimiento()
-
-    if grafico is None and error is None:
-        error = "No se pudo generar el gráfico de sentimiento."
+    imagenes, error = generar_graficas_sentimiento()
 
     return render_template(
         "sentimiento.html",
-        grafico_sentimiento=grafico,
+        imagenes=imagenes,
         error=error
     )
 
