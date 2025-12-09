@@ -77,16 +77,15 @@ def vista_kmeans():
 # ------------------ ANÁLISIS DE SENTIMIENTO ------------------ #
 @app.route("/sentimiento")
 def vista_sentimiento():
-    """
-    Página de análisis de sentimiento usando spotify_reviews.csv
-    """
-    sentimiento = run_sentimiento(REVIEWS_PATH)
-
+    csv_path = os.path.join("data", "spotify_reviews.csv")
+    sentimiento = run_sentimiento(csv_path)
     return render_template(
-        "sentimiento.html",
-        sentimiento=sentimiento
+        "index.html",
+        selected_model="Sentimiento",
+        sentimiento=sentimiento,
+        metrics=None,
+        results=None,
     )
-
 
 # ------------------ VISTA DEL DATASET ------------------ #
 @app.route("/dataset")
