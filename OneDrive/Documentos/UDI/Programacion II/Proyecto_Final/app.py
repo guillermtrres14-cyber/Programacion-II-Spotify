@@ -262,7 +262,6 @@ def vista_kmeans():
 def vista_sentimiento():
     grafico, error = grafico_sentimiento()
 
-    # Si no hay imagen ni error específico, ponemos uno genérico
     if grafico is None and error is None:
         error = "No se pudo generar el gráfico de sentimiento."
 

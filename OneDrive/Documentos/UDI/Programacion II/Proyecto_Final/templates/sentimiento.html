@@ -1,15 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1 class="text-3xl font-bold mb-2">Análisis de Sentimiento</h1>
-<p class="mb-4">Distribución de opiniones y palabras clave en las reseñas de usuarios.</p>
+<p class="mb-4">Distribución de opiniones y puntuaciones en las reseñas de usuarios.</p>
 
 {% if error %}
   <p class="text-red-500">{{ error }}</p>
+
 {% elif grafico_sentimiento %}
   <div style="text-align:center;">
-    <img src="data:image/png;base64,{{ grafico_sentimiento }}" alt="Gráfico de sentimiento" style="max-width:100%; border-radius:12px;">
+    <img src="data:image/png;base64,{{ grafico_sentimiento }}"
+         alt="Gráfico de sentimiento"
+         style="max-width:100%; border-radius:12px;">
   </div>
+
 {% else %}
   <p class="text-red-500">No se pudo procesar el análisis de sentimiento.</p>
 {% endif %}
+
 {% endblock %}
