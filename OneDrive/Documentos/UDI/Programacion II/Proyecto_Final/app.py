@@ -371,55 +371,35 @@ def index():
 
 @app.route("/regresion")
 def vista_regresion():
-    try:
-        grafico, metricas = grafico_regresion_y_metricas()
-        error = None
-    except Exception as e:
-        grafico = None
-        metricas = None
-        error = str(e)
-
+    imagenes, metricas, error = generar_graficas_regresion()
     return render_template(
         "regresion.html",
-        grafico_regresion=grafico,
+        imagenes=imagenes,
         metricas=metricas,
-        error=error
+        error=error,
     )
 
 
 @app.route("/arbol")
 def vista_arbol():
-    try:
-        grafico, metricas = grafico_arbol_y_metricas()
-        error = None
-    except Exception as e:
-        grafico = None
-        metricas = None
-        error = str(e)
-
+    imagenes, metricas, error = generar_graficas_arbol()
     return render_template(
         "arbol.html",
-        grafico_arbol=grafico,
+        imagenes=imagenes,
         metricas=metricas,
-        error=error
+        error=error,
     )
 
 
 @app.route("/kmeans")
 def vista_kmeans():
-    try:
-        grafico = grafico_kmeans()
-        error = None
-    except Exception as e:
-        grafico = None
-        error = str(e)
-
+    imagenes, metricas, error = generar_graficas_kmeans()
     return render_template(
         "kmeans.html",
-        grafico_kmeans=grafico,
-        error=error
+        imagenes=imagenes,
+        metricas=metricas,
+        error=error,
     )
-
 
 @app.route("/sentimiento")
 def vista_sentimiento():
