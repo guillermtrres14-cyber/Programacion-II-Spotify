@@ -146,27 +146,50 @@ def grafico_kmeans():
 # ------------------------ ANÁLISIS DE SENTIMIENTO ------------------- #
 def grafico_sentimiento():
     """
-    Lee un CSV de reseñas con una columna de sentimiento
-    y genera un gráfico de barras con la distribución.
+    Lee un CSV de reseñas y trata de detectar automáticamente
+    la columna de sentimiento (sentiment/label/polarity...).
+    Devuelve (imagen_base64, mensaje_error).
     """
     try:
         df = pd.read_csv(RUTA_DATA_REVIEWS)
     except Exception:
-        # si no existe el archivo o hay error, devolvemos None
-        return None
+        return None, "No se pudo leer el archivo de reseñas en " + RUTA_DATA_REVIEWS
 
-    conteo = df[COLUMNA_SENTIMIENTO].value_counts()
+    # intentar encontrar una columna adecuada
+    col_sent = None
+    for c in df.columns:
+        cl = c.lower()
+        if (
+            cl == COLUMNA_SENTIMIENTO.lower()
+            or "sentiment" in cl
+            or "label" in cl
+            or "polarity" in cl
+        ):
+            col_sent = c
+            break
+
+    if col_sent is None:
+        # no encontramos columna de sentimiento
+        cols = ", ".join(df.columns)
+        msg = (
+            "No se encontró una columna de sentimiento. "
+            f"Columnas disponibles en el CSV: {cols}"
+        )
+        return None, msg
+
+    # contamos los valores de la columna detectada
+    conteo = df[col_sent].value_counts()
 
     fig, ax = plt.subplots()
     conteo.plot(kind="bar", ax=ax)
     ax.set_xlabel("Sentimiento")
     ax.set_ylabel("Número de reseñas")
-    ax.set_title("Distribución de sentimiento en reseñas de Spotify")
+    ax.set_title(f"Distribución de sentimiento ({col_sent}) en reseñas de Spotify")
 
     img64 = fig_to_base64(fig)
     plt.close(fig)
 
-    return img64
+    return img64, None
 
 
 # --------------------------------------------------------------------
@@ -231,10 +254,11 @@ def vista_kmeans():
 
 @app.route("/sentimiento")
 def vista_sentimiento():
-    grafico = grafico_sentimiento()
-    error = None
-    if grafico is None:
-        error = "No se encontró el archivo de reseñas o la columna de sentimiento."
+    grafico, error = grafico_sentimiento()
+
+    # Si no hay imagen ni error específico, ponemos uno genérico
+    if grafico is None and error is None:
+        error = "No se pudo generar el gráfico de sentimiento."
 
     return render_template(
         "sentimiento.html",
