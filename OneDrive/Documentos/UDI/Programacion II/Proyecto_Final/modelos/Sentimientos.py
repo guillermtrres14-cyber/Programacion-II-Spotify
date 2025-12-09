@@ -16,7 +16,7 @@ STATIC_IMG = os.path.join(BASE_DIR, "static", "img")
 os.makedirs(STATIC_IMG, exist_ok=True)
 
 
-def analizar_sentimiento(texto):
+def analizar_sentimientos(texto):
     """Clasifica el sentimiento en Positivo, Negativo o Neutral usando TextBlob."""
     polarity = TextBlob(str(texto)).sentiment.polarity
     if polarity > 0.1:
@@ -59,7 +59,7 @@ def limpiar_y_tokenizar(texto: str):
     return palabras_limpias
 
 
-def run_sentimiento():
+def run_sentimientos():
     """
     Lee spotify_reviews.csv, calcula sentimiento, genera gráficas y devuelve
     las rutas de las imágenes + datos clave.
