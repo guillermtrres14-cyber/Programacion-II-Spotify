@@ -10,6 +10,53 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
+<style>
+  .navbar {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-link {
+    position: relative;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    padding-bottom: 4px;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #00f5ff, #00ff87, #ffd54f);
+    transition: width 0.25s ease-in-out;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 100%;
+  }
+
+  .nav-link:hover {
+    color: #ffffff;
+  }
+</style>
+
 <body>
 <div class="layout">
 
