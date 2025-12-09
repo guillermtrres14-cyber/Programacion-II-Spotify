@@ -206,7 +206,98 @@ def grafico_sentimiento():
 
     return img64, None
 
+def grafico_top_palabras():
+    try:
+        df = pd.read_csv(RUTA_DATA_REVIEWS)
+    except Exception:
+        return None, "No se pudo cargar el archivo de reseñas."
 
+    if "content" not in df.columns:
+        return None, "El CSV no tiene una columna 'content' con los textos."
+
+    textos = df["content"].dropna().astype(str)
+
+    # Limpiar texto
+    all_words = []
+    for t in textos:
+        t = t.lower()
+        t = re.sub(r"[^a-záéíóúñü ]", "", t)
+        palabras = t.split()
+        palabras = [p for p in palabras if p not in STOPWORDS and len(p) > 3]
+        all_words.extend(palabras)
+
+    if not all_words:
+        return None, "No se encontraron palabras significativas."
+
+    top = Counter(all_words).most_common(15)
+
+    # Gráfico
+    palabras, frecuencias = zip(*top)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.barh(palabras[::-1], frecuencias[::-1])
+    ax.set_title("Palabras más mencionadas en las reseñas")
+    ax.set_xlabel("Frecuencia")
+
+    img64 = fig_to_base64(fig)
+    plt.close(fig)
+
+    return img64, None
+
+def grafico_wordcloud():
+    try:
+        df = pd.read_csv(RUTA_DATA_REVIEWS)
+    except Exception:
+        return None, "No se pudo cargar el archivo de reseñas."
+
+    if "content" not in df.columns:
+        return None, "El CSV no tiene la columna 'content'."
+
+    textos = df["content"].dropna().astype(str)
+
+    # limpieza
+    texto = " ".join(textos).lower()
+    texto = re.sub(r"[^a-záéíóúñü ]", " ", texto)
+
+    # quitar stopwords
+    for sw in STOPWORDS:
+        texto = texto.replace(f" {sw} ", " ")
+
+    wc = WordCloud(
+        width=1200,
+        height=600,
+        background_color="white",
+        max_words=200,
+        colormap="viridis"
+    ).generate(texto)
+
+    fig = plt.figure(figsize=(12, 6))
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+
+    img64 = fig_to_base64(fig)
+    plt.close(fig)
+    return img64, None
+
+def grafico_longitud_comentarios():
+    try:
+        df = pd.read_csv(RUTA_DATA_REVIEWS)
+    except Exception:
+        return None, "No se pudo cargar el archivo de reseñas."
+
+    if "content" not in df.columns:
+        return None, "No existe la columna 'content'."
+
+    longitudes = df["content"].dropna().astype(str).apply(lambda x: len(x.split()))
+
+    fig, ax = plt.subplots()
+    ax.hist(longitudes, bins=30, color="#3498db", alpha=0.85)
+    ax.set_title("Distribución de longitud de comentarios")
+    ax.set_xlabel("Número de palabras")
+    ax.set_ylabel("Cantidad de reseñas")
+
+    img64 = fig_to_base64(fig)
+    plt.close(fig)
+    return img64, None
 # --------------------------------------------------------------------
 # RUTAS FLASK
 # --------------------------------------------------------------------
