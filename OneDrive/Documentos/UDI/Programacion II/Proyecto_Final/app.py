@@ -4,8 +4,18 @@ import re
 from collections import Counter
 import nltk
 
-# === CONFIGURACIÓN DEL DATASET SPOTIFY (IGUAL A LOS NOTEBOOKS) ===
-RUTA_DATA_SPOTIFY = "Spotify_2024_Global_Streaming_Data.csv"
+# === DATASET SPOTIFY ===
+RUTA_DATA_SPOTIFY = "Spotify_2024_Global_Streaming_Data.csv"  # ajusta si está en /data
+
+# Nombres REALES según tu mensaje
+COL_Y  = "Total Streams (Millions)"          # objetivo
+COL_X1 = "Monthly Listeners (Millions)"      # feature 1
+COL_X2 = "Streams Last 30 Days (Millions)"   # feature 2
+
+def cargar_spotify():
+    df = pd.read_csv(RUTA_DATA_SPOTIFY)
+    df = df.dropna()
+    return df
 
 NUMERIC_BASE = [
     "Release Year",
