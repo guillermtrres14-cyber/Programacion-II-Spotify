@@ -77,35 +77,6 @@ def fig_to_base64(fig):
 
 
 # ------------------------- REGRESIÓN LINEAL ------------------------- #
-def grafico_regresion_y_metricas():
-    df = df_spotify()
-
-    X = df[[COLUMNA_FEATURE_X]]
-    y = df[COLUMNA_STREAMS]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    modelo = LinearRegression()
-    modelo.fit(X_train, y_train)
-
-    y_pred = modelo.predict(X_test)
-    r2 = modelo.score(X_test, y_test)
-
-    fig, ax = plt.subplots()
-    ax.scatter(X_test, y_test, alpha=0.5, label="Real")
-    ax.plot(X_test, y_pred, linewidth=2, label="Predicción")
-    ax.set_xlabel(COLUMNA_FEATURE_X.capitalize())
-    ax.set_ylabel("Streams")
-    ax.set_title("Regresión lineal: Streams vs " + COLUMNA_FEATURE_X)
-    ax.legend()
-
-    img64 = fig_to_base64(fig)
-    plt.close(fig)
-
-    metricas = {"r2": round(r2, 4)}
-    return img64, metricas
 
 
 # ------------------------ ÁRBOL DE DECISIÓN ------------------------ #
