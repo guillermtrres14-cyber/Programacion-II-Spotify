@@ -108,34 +108,3 @@ def vista_dataset():
 # ------------------ MAIN ------------------ #
 if __name__ == "__main__":
     app.run(debug=True)
-Con este app.py:
-
-Desde tu terminal de VS Code (estando en la carpeta del proyecto y con el venv activo):
-
-powershell
-Copiar código
-(venv) PS C:\Users\...\Proyecto_Final> python app.py
-En el navegador:
-
-http://127.0.0.1:5000/ → portada (index).
-
-http://127.0.0.1:5000/regresion
-
-http://127.0.0.1:5000/arbol
-
-http://127.0.0.1:5000/kmeans
-
-http://127.0.0.1:5000/sentimiento
-
-http://127.0.0.1:5000/dataset
-
-En tus plantillas asegúrate de que los enlaces usan estos nombres de función, por ejemplo en base.html:
-
-html
-Copiar código
-<a href="{{ url_for('index') }}">Inicio</a>
-<a href="{{ url_for('vista_regresion') }}">Regresión Lineal</a>
-<a href="{{ url_for('vista_arbol') }}">Árbol de Decisión</a>
-<a href="{{ url_for('vista_kmeans') }}">K-means</a>
-<a href="{{ url_for('vista_sentimiento') }}">Sentimiento</a>
-<a href="{{ url_for('vista_dataset') }}">Dataset</a>
