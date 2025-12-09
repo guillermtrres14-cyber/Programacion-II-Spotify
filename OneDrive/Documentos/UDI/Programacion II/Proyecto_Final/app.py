@@ -371,6 +371,34 @@ def vista_sentimiento():
         error=error
     )
 
+@app.route("/top_palabras")
+def vista_top_palabras():
+    grafico, error = grafico_top_palabras()
+    return render_template(
+        "top_palabras.html",
+        grafico=grafico,
+        error=error
+    )
+
+
+@app.route("/wordcloud")
+def vista_wordcloud():
+    grafico, error = grafico_wordcloud()
+    return render_template(
+        "wordcloud.html",
+        grafico=grafico,
+        error=error
+    )
+
+
+@app.route("/longitud")
+def vista_longitud():
+    grafico, error = grafico_longitud_comentarios()
+    return render_template(
+        "longitud.html",
+        grafico=grafico,
+        error=error
+    )
 
 @app.route("/dataset")
 def vista_dataset():
