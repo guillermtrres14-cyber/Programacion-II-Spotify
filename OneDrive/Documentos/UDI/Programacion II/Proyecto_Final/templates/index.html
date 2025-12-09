@@ -1,86 +1,116 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Spotify ML Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <meta charset="UTF-8" />
+    <title>Spotify ML Dashboard 2024</title>
+
+    <!-- Fuentes y estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
+<div class="page">
 
-<!-- === NAVBAR === -->
-<nav class="navbar">
-    <div class="nav-left">
-        <div class="logo-circle">ML</div>
-        <div class="logo-text">
-            <h1>Spotify</h1>
-            <span>ML Dashboard</span>
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <div class="logo-icon">ML</div>
+                <div>
+                    <div class="logo-text-main">Spotify</div>
+                    <div class="logo-text-sub">ML Dashboard</div>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}">🏠 Inicio</a>
+                <a href="{{ url_for('vista_regresion') }}">📈 Regresión Lineal</a>
+                <a href="{{ url_for('vista_arbol') }}">🌳 Árbol de Decisión</a>
+                <a href="{{ url_for('vista_kmeans') }}">🧩 K-means</a>
+                <a href="{{ url_for('vista_sentimiento') }}">💬 Sentimiento</a>
+                <a href="{{ url_for('vista_dataset') }}">📊 Dataset</a>
+            </nav>
         </div>
-    </div>
+    </header>
 
-    <ul class="nav-links">
-        <li><a href="/" class="nav-item">🏠 Inicio</a></li>
-        <li><a href="/regresion" class="nav-item">📈 Regresión</a></li>
-        <li><a href="/arbol" class="nav-item">🌳 Árbol</a></li>
-        <li><a href="/kmeans" class="nav-item">🧬 K-means</a></li>
-        <li><a href="/sentimientos" class="nav-item">💬 Sentimiento</a></li>
-        <li><a href="/dataset" class="nav-item">📊 Dataset</a></li>
-    </ul>
-</nav>
+    <!-- HERO -->
+    <section class="hero">
 
-<!-- === HERO PRINCIPAL === -->
-<section class="hero">
-    <div class="hero-content">
-        <h2 class="small-title">SPOTIFY · MACHINE LEARNING · 2024</h2>
+        <div class="hero-left">
+            <div class="hero-tag">PROYECTO 2024 · ML</div>
 
-        <h1 class="hero-title">
-            Dashboard <span>Profesional</span> de  
-            <span class="green">Machine Learning</span>
-        </h1>
+            <h1 class="hero-title">
+                Dashboard de <span class="highlight">Machine Learning</span><br>
+                para Spotify 2024
+            </h1>
 
-        <p class="hero-subtitle">
-            Predice, segmenta e interpreta datos reales de Spotify con modelos de ML:
-            regresión, árboles de decisión, clustering K-means y análisis avanzado de sentimiento.
-        </p>
+            <p class="hero-subtitle">
+                Explora modelos de regresión, árboles de decisión, clustering y análisis de sentimiento 
+                sobre datos reales del streaming global.
+            </p>
 
-        <div class="hero-buttons">
-            <a href="/regresion" class="btn-primary">🚀 Empezar por Regresión</a>
-            <a href="/dataset" class="btn-secondary">📊 Ver Dataset</a>
-            <a href="/sentimientos" class="btn-purple">💜 Analizar Sentimiento</a>
+            <!-- BOTONES PRINCIPALES -->
+            <div class="hero-buttons">
+
+                <a href="{{ url_for('vista_regresion') }}" class="btn-primary">
+                    Empezar por Regresión
+                </a>
+
+                <a href="{{ url_for('vista_dataset') }}" class="btn-secondary">
+                    Ver Dataset
+                </a>
+
+            </div>
+
+            <div class="hero-buttons">
+                <a href="{{ url_for('vista_sentimiento') }}" class="btn-primary">
+                    💬 Analizar Sentimiento
+                </a>
+            </div>
+
         </div>
-    </div>
-</section>
 
-<!-- === SECCIÓN DE CARDS ELEGANTES === -->
-<section class="cards-section">
+        <!-- PANEL DERECHO -->
+        <aside class="hero-panel">
+            <div class="panel-header">
+                <div class="panel-title">Modelos disponibles</div>
+                <div class="panel-tag">ML 2024</div>
+            </div>
 
-    <div class="card">
-        <h3>📈 Regresión Lineal</h3>
-        <p>Modelo predictivo para estimar streams usando métricas reales.</p>
-        <a href="/regresion" class="card-btn">Ver modelo</a>
-    </div>
+            <p class="panel-desc">Explora cada modelo paso a paso.</p>
 
-    <div class="card">
-        <h3>🌳 Árbol de Decisión</h3>
-        <p>Modelo interpretable para descubrir qué variables influyen en los streams.</p>
-        <a href="/arbol" class="card-btn">Explorar árbol</a>
-    </div>
+            <div class="panel-grid">
 
-    <div class="card">
-        <h3>🧬 K-means Clustering</h3>
-        <p>Agrupación inteligente de países y artistas según su comportamiento.</p>
-        <a href="/kmeans" class="card-btn">Ver clusters</a>
-    </div>
+                <div class="panel-card">
+                    <div class="panel-icon">📈</div>
+                    <div class="panel-text">Predicción con Regresión Lineal</div>
+                </div>
 
-    <div class="card">
-        <h3>💬 Análisis de Sentimiento</h3>
-        <p>Procesamiento de texto y visualización de comentarios de usuarios.</p>
-        <a href="/sentimientos" class="card-btn">Analizar</a>
-    </div>
+                <div class="panel-card">
+                    <div class="panel-icon">🌳</div>
+                    <div class="panel-text">Interpretabilidad con Árbol</div>
+                </div>
 
-</section>
+                <div class="panel-card">
+                    <div class="panel-icon">🧩</div>
+                    <div class="panel-text">Segmentación con K-means</div>
+                </div>
 
+                <div class="panel-card">
+                    <div class="panel-icon">💬</div>
+                    <div class="panel-text">Opinión de usuarios</div>
+                </div>
+            </div>
+
+            <p class="panel-footer">
+                Basado en datos reales de Spotify 2024.
+            </p>
+        </aside>
+    </section>
+</div>
 </body>
 </html>
