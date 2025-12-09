@@ -22,7 +22,7 @@ def index():
 @app.route("/regresion")
 def vista_regresion():
     metrics = run_regresion(DATA_PATH)
-    return render_template("index.html", selected_model="Regresión Lineal", metrics=metrics)
+    return render_template("index.html", results=results)
 
 
 @app.route("/arbol")
