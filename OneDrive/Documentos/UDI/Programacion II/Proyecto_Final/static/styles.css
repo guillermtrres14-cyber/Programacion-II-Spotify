@@ -1,23 +1,28 @@
 :root {
-    --bg: #050816;
-    --bg-soft: #070c1c;
-    --bg-elevated: #0b1324;
-    --bg-glass: rgba(9, 17, 35, 0.85);
-    --primary: #1db954;
-    --primary-soft: rgba(29, 185, 84, 0.12);
-    --primary-strong: #19a448;
+    --bg-main: #020617;
+    --bg-panel: #050816;
+    --bg-card: #020617;
+    --bg-soft: #020617;
+    --spotify: #1db954;
+    --spotify-dark: #15803d;
     --accent: #22e4ac;
-    --danger: #ff4b6a;
-    --text-main: #f8fafc;
+    --accent-blue: #38bdf8;
+    --danger: #fb7185;
+
+    --text-main: #f9fafb;
     --text-muted: #9ca3af;
+
     --border-subtle: rgba(148, 163, 184, 0.25);
-    --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
-    --radius-lg: 18px;
+    --radius-lg: 20px;
     --radius-xl: 28px;
+
+    --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.7);
+
     --transition-fast: 0.18s ease-out;
     --transition-med: 0.25s ease-out;
-    --sidebar-width: 260px;
-    --nav-height: 64px;
+
+    --sidebar-width: 250px;
+    --nav-height: 60px;
 }
 
 *,
@@ -34,33 +39,37 @@ html, body {
 
 body {
     font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: radial-gradient(circle at 0 0, #182848 0, #050816 40%, #000 100%);
+    background:
+      radial-gradient(circle at 0 0, #0f172a 0, transparent 50%),
+      radial-gradient(circle at 100% 100%, #022c22 0, transparent 55%),
+      #020617;
     color: var(--text-main);
     -webkit-font-smoothing: antialiased;
 }
 
-/* Sutil glow animado en el fondo */
+/* Glow animado muy suave de fondo */
 body::before {
     content: "";
     position: fixed;
-    inset: -50px;
+    inset: -80px;
     background:
-      radial-gradient(circle at 0% 0%, rgba(29, 185, 84, 0.12) 0, transparent 55%),
-      radial-gradient(circle at 100% 100%, rgba(34, 228, 172, 0.10) 0, transparent 55%);
-    opacity: 0.8;
+      radial-gradient(circle at 10% 0%, rgba(34, 197, 94, 0.18) 0, transparent 55%),
+      radial-gradient(circle at 90% 100%, rgba(56, 189, 248, 0.16) 0, transparent 55%);
+    opacity: 0.9;
     pointer-events: none;
+    mix-blend-mode: screen;
     z-index: -1;
-    animation: glow 18s ease-in-out infinite alternate;
+    animation: bgPulse 22s ease-in-out infinite alternate;
 }
 
-@keyframes glow {
-    0% { transform: translate3d(0, 0, 0) scale(1); }
-    100% { transform: translate3d(-18px, 8px, 0) scale(1.05); }
+@keyframes bgPulse {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(-18px, 10px, 0) scale(1.04); }
 }
 
-/* =========================
+/* =====================================
    LAYOUT GENERAL
-   ========================= */
+   ===================================== */
 
 .page-shell {
     display: grid;
@@ -69,86 +78,64 @@ body::before {
     overflow: hidden;
 }
 
-/* =========================
+/* =====================================
    SIDEBAR
-   ========================= */
+   ===================================== */
 
 .sidebar {
     background: linear-gradient(180deg, #020617 0, #020617 40%, #020617 100%);
-    border-right: 1px solid rgba(15, 23, 42, 0.9);
-    box-shadow: 18px 0 45px rgba(0, 0, 0, 0.75);
+    border-right: 1px solid rgba(15, 23, 42, 0.85);
+    box-shadow: 18px 0 45px rgba(0, 0, 0, 0.85);
+    padding: 20px 18px;
     display: flex;
     flex-direction: column;
-    padding: 20px 18px;
-    gap: 28px;
-    position: relative;
+    gap: 26px;
     z-index: 20;
 }
 
 .sidebar-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .sidebar-logo {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     border-radius: 999px;
-    background: radial-gradient(circle at 30% 0, #22e4ac 0, #1db954 45%, #15803d 85%);
+    background: radial-gradient(circle at 30% 0, #22e4ac 0, #1db954 40%, #15803d 90%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #020617;
     font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 0.04em;
-    box-shadow: 0 0 25px rgba(34, 228, 172, 0.6);
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+    box-shadow: 0 0 26px rgba(34, 228, 172, 0.75);
 }
 
 .sidebar-title-main {
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 600;
 }
 
 .sidebar-title-sub {
-    font-size: 0.80rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
-}
-
-/* Botón menú (para móvil) */
-.sidebar-toggle {
-    display: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    background: transparent;
-    color: var(--text-main);
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
-}
-.sidebar-toggle:hover {
-    background: rgba(15, 23, 42, 0.85);
-    transform: translateY(-1px);
-    border-color: var(--primary);
 }
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: 6px;
 }
 
 .sidebar-section-label {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     text-transform: uppercase;
-    letter-spacing: 0.13em;
+    letter-spacing: 0.14em;
     color: rgba(148, 163, 184, 0.7);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .nav-item {
@@ -156,30 +143,22 @@ body::before {
 }
 
 .nav-link {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
+    padding: 9px 11px;
     border-radius: 999px;
     color: var(--text-muted);
-    font-size: 0.9rem;
     text-decoration: none;
-    position: relative;
+    font-size: 0.9rem;
     transition:
         background var(--transition-med),
         color var(--transition-med),
         transform var(--transition-med),
-        box-shadow var(--transition-med);
-}
-
-.nav-link::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
+        box-shadow var(--transition-med),
+        border-color var(--transition-med);
     border: 1px solid transparent;
-    transition: border-color var(--transition-med), opacity var(--transition-med);
-    opacity: 0;
 }
 
 .nav-link-icon {
@@ -188,50 +167,37 @@ body::before {
     justify-content: center;
 }
 
-.nav-link span {
-    flex: 1;
-}
-
-/* Hover / active */
 .nav-link:hover {
-    background: radial-gradient(circle at 0% 0%, rgba(29, 185, 84, 0.18) 0, transparent 55%);
-    color: var(--text-main);
+    background: radial-gradient(circle at 0 0, rgba(29, 185, 84, 0.25) 0, transparent 55%);
+    color: #f9fafb;
     transform: translateX(4px);
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.65);
-}
-
-.nav-link:hover::before {
-    border-color: rgba(148, 163, 184, 0.6);
-    opacity: 1;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.8);
+    border-color: rgba(74, 222, 128, 0.6);
 }
 
 .nav-link.active {
-    background: linear-gradient(90deg, rgba(29, 185, 84, 0.20), rgba(34, 197, 94, 0.12));
-    color: #e5fdf1;
-    box-shadow: 0 16px 38px rgba(22, 163, 74, 0.6);
-}
-.nav-link.active::before {
-    border-color: rgba(74, 222, 128, 0.65);
-    opacity: 1;
+    background: linear-gradient(90deg, rgba(29, 185, 84, 0.24), rgba(34, 197, 94, 0.16));
+    color: #e5fff2;
+    border-color: rgba(74, 222, 128, 0.85);
+    box-shadow: 0 16px 34px rgba(21, 128, 61, 0.75);
 }
 
-/* Footer pequeño de la sidebar */
+/* Pequeño footer */
 .sidebar-footer {
     margin-top: auto;
     font-size: 0.78rem;
     color: rgba(148, 163, 184, 0.8);
 }
 
-/* =========================
+/* =====================================
    MAIN
-   ========================= */
+   ===================================== */
 
 .main {
-    min-width: 0;
     display: flex;
     flex-direction: column;
+    min-width: 0;
     height: 100vh;
-    overflow: hidden;
 }
 
 .main-header {
@@ -241,169 +207,195 @@ body::before {
     justify-content: center;
     padding: 0 28px;
     border-bottom: 1px solid rgba(15, 23, 42, 0.85);
-    background: rgba(7, 12, 28, 0.94);
+    background: rgba(5, 8, 22, 0.96);
     backdrop-filter: blur(18px);
-    position: sticky;
-    top: 0;
-    z-index: 15;
 }
 
 .main-header-title {
-    font-size: 0.95rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
+    font-size: 0.96rem;
     text-transform: uppercase;
-    color: rgba(148, 163, 184, 0.9);
+    letter-spacing: 0.14em;
+    color: rgba(148, 163, 184, 0.95);
 }
 
-/* Contenedor scroll principal */
 .main-scroll {
-    padding: 22px 28px 30px;
+    padding: 22px 26px 28px;
     overflow-y: auto;
 }
 
-/* =========================
-   HERO
-   ========================= */
+/* =====================================
+   HERO – BOTONES GRANDES E INTERACTIVOS
+   ===================================== */
 
 .hero {
     display: grid;
-    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1.1fr);
+    grid-template-columns: minmax(0, 2.2fr) minmax(320px, 1.1fr);
     gap: 24px;
     margin-bottom: 28px;
 }
 
 .hero-card {
-    background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.15) 0, rgba(15, 23, 42, 0.95) 55%);
-    border-radius: var(--radius-xl);
-    padding: 26px 26px 24px;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(148, 163, 184, 0.35);
     position: relative;
+    background: radial-gradient(circle at 0 0, rgba(29, 185, 84, 0.25) 0, #020617 55%);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    padding: 26px 26px 22px;
+    box-shadow: var(--shadow-soft);
     overflow: hidden;
 }
 
+/* Glow extra en el lado derecho */
 .hero-card::after {
     content: "";
     position: absolute;
-    inset: -30%;
-    background: radial-gradient(circle at 80% 0%, rgba(56, 189, 248, 0.18), transparent 55%);
-    opacity: 0.82;
-    pointer-events: none;
+    inset: -35%;
+    background: radial-gradient(circle at 95% 0%, rgba(56, 189, 248, 0.22), transparent 55%);
     mix-blend-mode: screen;
+    opacity: 0.8;
+    pointer-events: none;
 }
 
 .hero-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 4px 10px;
+    padding: 4px 11px;
     border-radius: 999px;
     background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.65);
     color: rgba(148, 163, 184, 0.95);
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     position: relative;
     z-index: 1;
 }
 
 .hero-eyebrow span {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 999px;
-    background: radial-gradient(circle, #22e4ac, #1db954);
-    box-shadow: 0 0 12px rgba(34, 228, 172, 0.85);
+    background: radial-gradient(circle, var(--accent), var(--spotify));
+    box-shadow: 0 0 15px rgba(34, 228, 172, 0.9);
 }
 
 .hero-title {
-    font-size: 1.9rem;
-    line-height: 1.25;
+    font-size: 2.1rem;
+    line-height: 1.2;
     margin-top: 16px;
     margin-bottom: 10px;
-    max-width: 620px;
+    max-width: 650px;
     position: relative;
     z-index: 1;
 }
 
 .hero-title span {
-    color: var(--primary);
+    color: var(--spotify);
 }
 
 .hero-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.96rem;
     color: var(--text-muted);
-    max-width: 580px;
+    max-width: 620px;
     position: relative;
     z-index: 1;
 }
 
-/* Botones hero */
+/* --- BOTONES HERO XXL --- */
 
 .hero-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 14px;
-    margin-top: 20px;
+    margin-top: 22px;
 }
 
 .btn {
-    border-radius: 999px;
-    padding: 10px 18px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    border: 1px solid transparent;
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    font-size: 0.92rem;
     text-decoration: none;
+    cursor: pointer;
     transition:
         background var(--transition-fast),
         color var(--transition-fast),
         box-shadow var(--transition-fast),
         transform var(--transition-fast),
-        border-color var(--transition-fast);
+        border-color var(--transition-fast),
+        filter var(--transition-fast);
 }
 
+.hero-actions .btn {
+    /* BOTONES GRANDES SOLO EN EL HERO */
+    padding: 14px 30px;
+    font-size: 0.98rem;
+}
+
+/* Botón principal – GRANDE Y CON GLOW */
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0, var(--primary-strong) 60%);
+    position: relative;
+    background: linear-gradient(135deg, var(--spotify) 0, var(--spotify-dark) 55%, #16a34a 100%);
     color: #020617;
-    box-shadow: 0 0 0 rgba(22, 163, 74, 0.0);
+    box-shadow: 0 0 0 rgba(22, 163, 74, 0);
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.38) 0, transparent 45%);
+    opacity: 0;
+    transform: translateX(-40%) translateY(-40%) scale(0.8);
+    transition: opacity 0.22s ease-out, transform 0.22s ease-out;
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px) translateX(1px);
-    box-shadow: 0 0 32px rgba(34, 197, 94, 0.65);
+    transform: translateY(-3px) translateX(1px) scale(1.02);
+    box-shadow: 0 22px 40px rgba(22, 163, 74, 0.8);
+    filter: saturate(1.1);
 }
 
+.btn-primary:hover::before {
+    opacity: 0.85;
+    transform: translateX(0) translateY(0) scale(1);
+}
+
+/* Botón secundario grande */
 .btn-ghost {
     background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(148, 163, 184, 0.6);
+    border-color: rgba(148, 163, 184, 0.7);
     color: var(--text-main);
 }
 
 .btn-ghost:hover {
     background: rgba(15, 23, 42, 1);
-    border-color: var(--primary);
-    transform: translateY(-1px);
+    border-color: var(--spotify);
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.9);
+    transform: translateY(-2px);
 }
 
-/* Meta texto bajo botones */
 .hero-meta {
-    margin-top: 18px;
+    margin-top: 16px;
     font-size: 0.86rem;
     color: var(--text-muted);
 }
 
-/* Panel lateral de modelos */
+/* =====================================
+   PANEL LATERAL (MODELOS DISPONIBLES)
+   ===================================== */
 
 .hero-side-panel {
-    background: var(--bg-glass);
-    border-radius: var(--radius-xl);
-    padding: 20px 18px;
-    border: 1px solid rgba(148, 163, 184, 0.45);
-    box-shadow: var(--shadow-soft);
     position: relative;
+    background: rgba(5, 8, 22, 0.96);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    padding: 20px 18px 18px;
+    box-shadow: var(--shadow-soft);
     overflow: hidden;
 }
 
@@ -411,29 +403,29 @@ body::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.26), transparent 55%);
-    opacity: 0.55;
+    background: radial-gradient(circle at 0 0, rgba(29, 185, 84, 0.25), transparent 55%);
+    opacity: 0.65;
     mix-blend-mode: soft-light;
     pointer-events: none;
 }
 
 .hero-panel-title {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .hero-panel-subtitle {
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     color: var(--text-muted);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .hero-panel-list {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     margin-top: 6px;
 }
 
@@ -442,46 +434,50 @@ body::before {
     gap: 8px;
     align-items: flex-start;
     font-size: 0.86rem;
-    color: rgba(209, 213, 219, 0.95);
+    color: rgba(209, 213, 219, 0.98);
 }
 
-.hero-panel-bullet {
-    width: 16px;
-    margin-top: 4px;
+.hero-panel-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 0, var(--accent-blue) 0, #0ea5e9 65%);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.9);
 }
 
-/* =========================
-   GRID DE CARDS MODELOS / SECCIONES
-   ========================= */
+/* =====================================
+   SECCIONES, CARDS Y GRÁFICAS
+   ===================================== */
 
 .section-title {
-    font-size: 1.05rem;
-    margin-bottom: 6px;
+    font-size: 1.08rem;
+    margin-bottom: 4px;
 }
 
 .section-subtitle {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     margin-bottom: 18px;
 }
 
 .model-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
 }
 
+/* Tarjetas de modelos – con efecto 3D sutil */
 .model-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95));
-    border-radius: var(--radius-lg);
-    padding: 14px 14px 16px;
-    border: 1px solid rgba(31, 41, 55, 0.9);
-    box-shadow: 0 18px 28px rgba(0, 0, 0, 0.65);
     position: relative;
-    overflow: hidden;
+    background: radial-gradient(circle at 0 0, rgba(22, 163, 74, 0.14), #020617 70%);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(31, 41, 55, 0.95);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.85);
+    padding: 14px 14px 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    overflow: hidden;
     transition:
         transform var(--transition-med),
         box-shadow var(--transition-med),
@@ -492,17 +488,17 @@ body::before {
 .model-card::after {
     content: "";
     position: absolute;
-    inset: -30%;
-    background: radial-gradient(circle at 0 100%, rgba(29, 185, 84, 0.15), transparent 60%);
+    inset: -40%;
+    background: radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.18), transparent 60%);
     opacity: 0;
     transition: opacity var(--transition-med);
 }
 
 .model-card:hover {
-    transform: translateY(-4px) translateX(1px);
-    box-shadow: 0 26px 40px rgba(0, 0, 0, 0.9);
+    transform: translateY(-5px) translateX(2px) scale(1.01);
+    box-shadow: 0 26px 45px rgba(0, 0, 0, 0.95);
     border-color: rgba(74, 222, 128, 0.7);
-    background: radial-gradient(circle at 0 0, rgba(22, 163, 74, 0.26), #020617 70%);
+    background: radial-gradient(circle at 0 0, rgba(22, 163, 74, 0.24), #020617 75%);
 }
 
 .model-card:hover::after {
@@ -510,19 +506,19 @@ body::before {
 }
 
 .model-card-tag {
-    font-size: 0.73rem;
+    font-size: 0.74rem;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.13em;
     color: rgba(148, 163, 184, 0.9);
 }
 
 .model-card-title {
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
 .model-card-desc {
-    font-size: 0.85rem;
+    font-size: 0.86rem;
     color: var(--text-muted);
     flex: 1;
 }
@@ -531,22 +527,24 @@ body::before {
     margin-top: 6px;
 }
 
-/* =========================
-   CONTENEDORES DE GRÁFICAS
-   ========================= */
+/* Contenedor de gráficas */
+.charts-section {
+    margin-top: 10px;
+    margin-bottom: 26px;
+}
 
 .charts-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.5fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr);
     gap: 16px;
     margin-top: 14px;
 }
 
 .chart-card {
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(5, 8, 22, 0.96);
     border-radius: var(--radius-lg);
     border: 1px solid rgba(31, 41, 55, 0.95);
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
     padding: 12px 14px 14px;
     display: flex;
     flex-direction: column;
@@ -554,7 +552,7 @@ body::before {
 }
 
 .chart-card h3 {
-    font-size: 0.95rem;
+    font-size: 0.96rem;
 }
 
 .chart-description {
@@ -564,20 +562,20 @@ body::before {
 
 .chart-image {
     width: 100%;
-    border-radius: 14px;
-    border: 1px solid rgba(31, 41, 55, 0.9);
+    border-radius: 16px;
+    border: 1px solid rgba(31, 41, 55, 0.95);
     margin-top: 4px;
 }
 
-/* =========================
-   DATASET TABLE WRAPPER
-   ========================= */
+/* =====================================
+   TABLA DATASET
+   ===================================== */
 
 .data-table-wrapper {
-    background: rgba(15, 23, 42, 0.96);
+    background: rgba(5, 8, 22, 0.96);
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(31, 41, 55, 0.9);
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(31, 41, 55, 0.95);
+    box-shadow: 0 22px 42px rgba(0, 0, 0, 0.9);
     padding: 14px;
     overflow: auto;
 }
@@ -594,23 +592,19 @@ body::before {
 
 .data-table th,
 .data-table td {
-    border-bottom: 1px solid rgba(31, 41, 55, 0.9);
     padding: 6px 8px;
+    border-bottom: 1px solid rgba(31, 41, 55, 0.95);
     white-space: nowrap;
 }
 
 .data-table th {
-    font-weight: 600;
     text-align: left;
+    font-weight: 600;
 }
 
-.data-table tr:nth-child(even) {
-    background: rgba(15, 23, 42, 0.85);
-}
-
-/* =========================
+/* =====================================
    RESPONSIVE
-   ========================= */
+   ===================================== */
 
 @media (max-width: 960px) {
     .page-shell {
@@ -620,21 +614,13 @@ body::before {
     .sidebar {
         position: fixed;
         inset: 0 auto 0 0;
-        width: 250px;
+        width: 240px;
         transform: translateX(-100%);
         transition: transform var(--transition-med);
     }
 
     .sidebar.is-open {
         transform: translateX(0);
-    }
-
-    .main-header {
-        justify-content: space-between;
-    }
-
-    .sidebar-toggle {
-        display: inline-flex;
     }
 
     .main-scroll {
@@ -660,25 +646,21 @@ body::before {
         grid-template-columns: minmax(0, 1fr);
     }
 }
-Opcional: JS para abrir/cerrar el menú lateral en móvil
-En tu plantilla base donde tengas el <body>, solo necesitas:
+Opcional (pero recomendado): toggle del menú lateral en móvil
+Si aún no lo tienes, en tu plantilla base puedes usar algo así para mostrar/ocultar la sidebar en pantallas pequeñas:
 
 html
 Copiar código
-<!-- Botón dentro del header -->
-<button class="sidebar-toggle" data-sidebar-toggle>
-    ☰
-</button>
+<!-- En el header -->
+<button class="sidebar-toggle" data-sidebar-toggle>☰</button>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.querySelector('[data-sidebar-toggle]');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (toggle && sidebar) {
-        toggle.addEventListener('click', () => {
-            sidebar.classList.toggle('is-open');
-        });
-    }
+  const toggle = document.querySelector('[data-sidebar-toggle]');
+  const sidebar = document.querySelector('.sidebar');
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('is-open');
+  });
 });
 </script>
