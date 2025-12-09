@@ -477,17 +477,25 @@ def vista_sentimiento():
 def vista_dataset():
     try:
         df = cargar_spotify()
+        filas, columnas = df.shape
+
         tabla_html = df.head(50).to_html(
-            classes="table table-striped table-sm", index=False
+            classes="table table-striped table-sm",
+            index=False
         )
         error = None
     except Exception as e:
         tabla_html = None
+        filas = columnas = 0
         error = str(e)
 
-    return render_template("dataset.html", tabla_html=tabla_html, error=error)
-
-
+    return render_template(
+        "dataset.html",
+        tabla_html=tabla_html,
+        filas=filas,
+        columnas=columnas,
+        error=error
+    )
 # ============================================================
 # MAIN
 # ============================================================
