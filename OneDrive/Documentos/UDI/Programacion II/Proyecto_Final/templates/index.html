@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <title>Spotify ML Dashboard 2024</title>
+
+    <!-- Fuentes y estilos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
 <div class="page">
+
     <!-- NAVBAR -->
     <header class="navbar">
         <div class="logo">
@@ -19,6 +24,7 @@
                 <div class="logo-text-sub">Proyecto de Machine Learning – 2024</div>
             </div>
         </div>
+
         <nav class="nav-links">
             <a href="{{ url_for('index') }}">Inicio</a>
             <a href="{{ url_for('vista_dataset') }}">Dataset</a>
@@ -26,321 +32,212 @@
         </nav>
     </header>
 
-    {# Flags para saber qué modelo está activo #}
-    {% set hay_regresion = results is defined and results and results.ok %}
-    {% set hay_arbol = metrics is defined and metrics and metrics.ok and selected_model == "Árbol de Decisión" %}
-    {% set hay_kmeans = metrics is defined and metrics and metrics.ok and selected_model == "K-means" %}
-
     <!-- HERO -->
     <section class="hero">
         <div class="hero-text">
+
             <div class="eyebrow">
                 <span></span>
                 <div>Análisis global de streaming en Spotify</div>
             </div>
 
             <h1 class="hero-title">
-                Predice y agrupa <span class="hero-highlight">streams</span>
+                Predice, agrupa y analiza <span class="hero-highlight">streams</span>
                 con modelos de Machine Learning.
             </h1>
 
             <p class="hero-subtitle">
-                Esta aplicación ejecuta modelos de <strong>Regresión Lineal</strong>,
-                <strong>Árbol de Decisión</strong> y <strong>K-means</strong> sobre el dataset
-                <strong>Spotify 2024 Global Streaming</strong> para analizar el comportamiento
-                de reproducción en diferentes países y artistas.
+                Esta plataforma permite ejecutar modelos de
+                <strong>Regresión Lineal</strong>,
+                <strong>Árbol de Decisión</strong>,
+                <strong>K-means</strong>
+                y <strong>Análisis de Sentimiento</strong>,
+                utilizando datos reales del dataset Spotify 2024.
             </p>
 
+            <!-- BOTONES PRINCIPALES -->
             <div class="hero-actions">
                 <a href="{{ url_for('vista_regresion') }}" class="btn btn-primary">
                     Ejecutar Regresión de Streams
                 </a>
                 <a href="{{ url_for('vista_dataset') }}" class="btn btn-ghost">
-                    Ver muestra del dataset
+                    Ver muestra del Dataset
+                </a>
+                <a href="{{ url_for('vista_sentimiento') }}" class="btn btn-primary">
+                    Análisis de Sentimiento
                 </a>
             </div>
 
+            <!-- METRICS INFO -->
             <div class="hero-meta">
-                {% if hay_regresion %}
-                    Modelo actual: <strong>Regresión Lineal</strong> ·
-                    Target: <strong>{{ results.target }}</strong> ·
-                    R²: <strong>{{ results.r2 }}</strong>
-                {% elif hay_arbol %}
-                    Modelo actual: <strong>Árbol de Decisión</strong> ·
-                    Target: <strong>{{ metrics.columna_objetivo }}</strong> ·
-                    R²: <strong>{{ metrics.R2 }}</strong>
-                {% elif hay_kmeans %}
-                    Modelo actual: <strong>K-means</strong> ·
-                    Clusters: <strong>{{ metrics.n_clusters }}</strong> ·
-                    Inercia: <strong>{{ metrics.inercia }}</strong>
+                {% if selected_model %}
+                    Modelo seleccionado:
+                    <strong>{{ selected_model }}</strong>
                 {% else %}
-                    Selecciona uno de los modelos para ver sus métricas en tiempo real.
+                    Selecciona un modelo para ver sus métricas.
                 {% endif %}
             </div>
         </div>
 
-        <!-- PANEL MÉTRICAS -->
+        <!-- PANEL DERECHA DE MÉTRICAS -->
         <aside class="hero-panel">
             <div class="panel-header">
                 <div>
                     <div class="panel-title">
-                        {% if hay_regresion %}
-                            Resultados – Regresión Lineal
-                        {% elif hay_arbol %}
-                            Resultados – Árbol de Decisión
-                        {% elif hay_kmeans %}
-                            Resultados – K-means
+                        {% if selected_model %}
+                            Resultados – {{ selected_model }}
                         {% else %}
                             Resultados del modelo
                         {% endif %}
                     </div>
+
                     <div class="panel-subtitle">
-                        {% if hay_regresion %}
-                            Predicción de Total Streams (Millions)
-                        {% elif hay_arbol %}
-                            {{ metrics.tipo }}
-                        {% elif hay_kmeans %}
+                        {% if metrics %}
                             {{ metrics.tipo }}
                         {% else %}
-                            Aún no se han podido calcular métricas.
+                            Aún no has ejecutado ningún modelo.
                         {% endif %}
                     </div>
                 </div>
+
                 <div class="panel-chip">Spotify 2024</div>
             </div>
 
-            {% if hay_regresion %}
+            {% if metrics and metrics.ok %}
                 <div class="metrics-grid">
-                    <div>
-                        <div class="metric-label">R²</div>
-                        <div class="metric-value">{{ results.r2 }}</div>
-                    </div>
-                    <div>
-                        <div class="metric-label">MSE</div>
-                        <div class="metric-value">{{ results.mse }}</div>
-                    </div>
-                    <div>
-                        <div class="metric-label">MAE</div>
-                        <div class="metric-value">{{ results.mae }}</div>
-                    </div>
-                    <div>
-                        <div class="metric-label">Mejor predictor</div>
-                        <div class="metric-value">{{ results.best_feature }}</div>
-                    </div>
+                    {% if metrics.R2 %}<div><div class="metric-label">R²</div><div class="metric-value">{{ metrics.R2 }}</div></div>{% endif %}
+                    {% if metrics.MSE %}<div><div class="metric-label">MSE</div><div class="metric-value">{{ metrics.MSE }}</div></div>{% endif %}
+                    {% if metrics.MAE %}<div><div class="metric-label">MAE</div><div class="metric-value">{{ metrics.MAE }}</div></div>{% endif %}
+                    {% if metrics.n_clusters %}<div><div class="metric-label">Clusters</div><div class="metric-value">{{ metrics.n_clusters }}</div></div>{% endif %}
+                    {% if metrics.inercia %}<div><div class="metric-label">Inercia</div><div class="metric-value">{{ metrics.inercia }}</div></div>{% endif %}
                 </div>
-
-                <div class="panel-footer">
-                    El modelo se entrenó para predecir
-                    <span>{{ results.target }}</span> usando variables numéricas del dataset
-                    de Spotify 2024.
-                </div>
-
-            {% elif hay_arbol %}
-                <div class="metrics-grid">
-                    {% if metrics.MAE is defined %}
-                    <div>
-                        <div class="metric-label">MAE</div>
-                        <div class="metric-value">{{ metrics.MAE }}</div>
-                    </div>
-                    {% endif %}
-                    {% if metrics.MSE is defined %}
-                    <div>
-                        <div class="metric-label">MSE</div>
-                        <div class="metric-value">{{ metrics.MSE }}</div>
-                    </div>
-                    {% endif %}
-                    {% if metrics.RMSE is defined %}
-                    <div>
-                        <div class="metric-label">RMSE</div>
-                        <div class="metric-value">{{ metrics.RMSE }}</div>
-                    </div>
-                    {% endif %}
-                    {% if metrics.R2 is defined %}
-                    <div>
-                        <div class="metric-label">R²</div>
-                        <div class="metric-value">{{ metrics.R2 }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="panel-footer">
-                    Modelo entrenado para predecir
-                    <span>{{ metrics.columna_objetivo }}</span> usando un Árbol de Decisión
-                    sobre variables numéricas del dataset de Spotify 2024.
-                </div>
-
-            {% elif hay_kmeans %}
-                <div class="metrics-grid">
-                    <div>
-                        <div class="metric-label">Clusters</div>
-                        <div class="metric-value">{{ metrics.n_clusters }}</div>
-                    </div>
-                    <div>
-                        <div class="metric-label">Inercia</div>
-                        <div class="metric-value">{{ metrics.inercia }}</div>
-                    </div>
-                </div>
-
-                <div class="panel-footer">
-                    Segmentación de países/artistas en
-                    <span>{{ metrics.n_clusters }}</span> grupos utilizando K-means
-                    sobre métricas clave de streaming.
-                </div>
-
             {% else %}
                 <div class="panel-footer">
-                    Ejecuta alguno de los modelos para visualizar aquí sus métricas principales
-                    (R², MSE, MAE, RMSE, inercia, etc.).
-                    {% if results is defined and results and not results.ok %}
-                        <br><br>
-                        <span style="color:#e74c3c; font-size: 0.9rem;">
-                            {{ results.error }}
-                        </span>
-                    {% elif metrics is defined and metrics and not metrics.ok %}
-                        <br><br>
-                        <span style="color:#e74c3c; font-size: 0.9rem;">
-                            {{ metrics.error }}
-                        </span>
-                    {% endif %}
+                    Ejecuta cualquier modelo de ML para visualizar métricas aquí.
                 </div>
             {% endif %}
         </aside>
     </section>
 
-    <!-- VISUALIZACIONES REGRESIÓN -->
-    {% if hay_regresion %}
+
+
+    <!-- =====================
+          VISUALIZACIONES
+       ===================== -->
+
+    <!-- REGRESIÓN LINEAL -->
+    {% if selected_model == "Regresión Lineal" and results and results.ok %}
     <section class="charts-section">
-        <h2 class="section-title">Visualizaciones de la Regresión Lineal</h2>
+        <h2 class="section-title">Regresión Lineal</h2>
         <p class="section-subtitle">
-            Las siguientes gráficas muestran la relación entre la variable más
-            influyente y el objetivo, así como la importancia relativa de las
-            variables del modelo.
+           Relación entre la variable más influyente y el objetivo, junto con importancia de variables.
         </p>
 
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>Relación {{ results.best_feature }} vs {{ results.target }}</h3>
-                <p class="chart-description">
-                    Dispersión de los datos reales y línea de regresión ajustada.
-                </p>
-                {% if results.images.scatter %}
-                    <img
-                        src="{{ url_for('static', filename=results.images.scatter) }}"
-                        alt="Scatter + línea de regresión"
-                        class="chart-image"
-                    >
-                {% endif %}
+                <h3>Scatter + Línea de Regresión</h3>
+                <img src="{{ url_for('static', filename=results.images.scatter) }}" class="chart-image">
             </div>
 
             <div class="chart-card">
                 <h3>Importancia de Variables</h3>
-                <p class="chart-description">
-                    Importancia (valor absoluto del coeficiente) de cada variable
-                    en el modelo de regresión lineal.
-                </p>
-                {% if results.images.importancia %}
-                    <img
-                        src="{{ url_for('static', filename=results.images.importancia) }}"
-                        alt="Importancia de variables en la regresión"
-                        class="chart-image"
-                    >
-                {% endif %}
+                <img src="{{ url_for('static', filename=results.images.importancia) }}" class="chart-image">
             </div>
         </div>
     </section>
     {% endif %}
 
-    <!-- VISUALIZACIONES ÁRBOL DE DECISIÓN -->
-    {% if hay_arbol %}
+
+    <!-- ÁRBOL DE DECISIÓN -->
+    {% if selected_model == "Árbol de Decisión" and metrics and metrics.ok %}
     <section class="charts-section">
-        <h2 class="section-title">Visualizaciones del Árbol de Decisión</h2>
+        <h2 class="section-title">Árbol de Decisión</h2>
+        <p class="section-subtitle">Predicción vs datos reales e importancia de variables.</p>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Reales vs Predichos</h3>
+                <img src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Importancia de Variables</h3>
+                <img src="{{ url_for('static', filename=metrics.images.importancia) }}" class="chart-image">
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+
+    <!-- K-MEANS -->
+    {% if selected_model == "K-means" and metrics and metrics.ok %}
+    <section class="charts-section">
+        <h2 class="section-title">K-means Clustering</h2>
         <p class="section-subtitle">
-            El Árbol de Decisión permite entender cómo distintas variables explican
-            el total de streams. A continuación se muestra el desempeño del modelo
-            y la importancia de las variables.
+            Representación PCA de los clusters y tamaño de cada grupo.
         </p>
 
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>Streams reales vs predichos</h3>
-                <p class="chart-description">
-                    Cada punto representa una observación del conjunto de prueba;
-                    la línea roja indica la predicción perfecta.
-                </p>
-                {% if metrics.images.real_vs_pred %}
-                    <img
-                        src="{{ url_for('static', filename=metrics.images.real_vs_pred) }}"
-                        alt="Árbol de decisión: Real vs Predicho"
-                        class="chart-image"
-                    >
-                {% endif %}
+                <h3>Clusters (PCA)</h3>
+                <img src="{{ url_for('static', filename=metrics.images.clusters_pca) }}" class="chart-image">
             </div>
 
             <div class="chart-card">
-                <h3>Importancia de variables</h3>
-                <p class="chart-description">
-                    Variables con mayor peso en las decisiones del árbol.
-                </p>
-                {% if metrics.images.importancia %}
-                    <img
-                        src="{{ url_for('static', filename=metrics.images.importancia) }}"
-                        alt="Árbol de decisión: Importancia de variables"
-                        class="chart-image"
-                    >
-                {% endif %}
+                <h3>Tamaño de los Clusters</h3>
+                <img src="{{ url_for('static', filename=metrics.images.tamaño_clusters) }}" class="chart-image">
             </div>
         </div>
     </section>
     {% endif %}
 
-    <!-- VISUALIZACIONES K-MEANS -->
-    {% if hay_kmeans %}
+
+    <!-- ANÁLISIS DE SENTIMIENTO -->
+    {% if sentimiento and sentimiento.ok %}
     <section class="charts-section">
-        <h2 class="section-title">Visualizaciones de K-means</h2>
+        <h2 class="section-title">Análisis de Sentimiento – Reseñas Spotify</h2>
         <p class="section-subtitle">
-            Clusters de países o artistas según sus métricas de escucha en Spotify 2024.
+            Analiza la opinión emocional de los usuarios y descubre los temas más comentados.
         </p>
 
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>Clusters en espacio PCA</h3>
-                <p class="chart-description">
-                    Representación en 2D (PCA) coloreada por cluster asignado por K-means.
-                </p>
-                {% if metrics.images.clusters_pca %}
-                    <img
-                        src="{{ url_for('static', filename=metrics.images.clusters_pca) }}"
-                        alt="Clusters K-means en PCA"
-                        class="chart-image"
-                    >
-                {% endif %}
+                <h3>Distribución del Sentimiento</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.pie) }}" class="chart-image">
             </div>
 
             <div class="chart-card">
-                <h3>Tamaño de los clusters</h3>
-                <p class="chart-description">
-                    Número de observaciones en cada grupo encontrado por K-means.
-                </p>
-                {% if metrics.images['tamaño_clusters'] %}
-                    <img
-                        src="{{ url_for('static', filename=metrics.images['tamaño_clusters']) }}"
-                        alt="Tamaño de los clusters K-means"
-                        class="chart-image"
-                    >
-                {% endif %}
+                <h3>Score Promedio por Sentimiento</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.bar) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Nube de Palabras</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.wc) }}" class="chart-image">
+            </div>
+
+            <div class="chart-card">
+                <h3>Palabras Más Mencionadas</h3>
+                <img src="{{ url_for('static', filename=sentimiento.images.top_words) }}" class="chart-image">
             </div>
         </div>
     </section>
+
+    {% elif sentimiento and not sentimiento.ok %}
+    <section class="charts-section">
+        <h3 style="color:#e74c3c;">Error al procesar análisis de sentimiento: {{ sentimiento.error }}</h3>
+    </section>
     {% endif %}
+
 
     <!-- CARDS DE MODELOS -->
     <section class="cards">
+
         <article class="card">
             <div class="card-title">Regresión Lineal</div>
             <div class="card-tag">Predicción de streams</div>
             <p class="card-text">
-                Estima el valor de <strong>Total Streams (Millions)</strong> usando variables
-                numéricas como oyentes mensuales, horas reproducidas y duración media.
+                Estima el valor de <strong>Total Streams (Millions)</strong> usando variables numéricas del dataset.
             </p>
             <a href="{{ url_for('vista_regresion') }}" class="btn btn-primary">Ver modelo</a>
         </article>
@@ -349,32 +246,40 @@
             <div class="card-title">Árbol de Decisión</div>
             <div class="card-tag">Modelo interpretable</div>
             <p class="card-text">
-                Permite entender qué factores del streaming influyen más en el volumen
-                de reproducciones totales por artista o país.
+                Identifica qué variables influyen más en el stream total.
             </p>
             <a href="{{ url_for('vista_arbol') }}" class="btn btn-primary">Ver modelo</a>
         </article>
 
         <article class="card">
-            <div class="card-title">K-means Clustering</div>
-            <div class="card-tag">Segmentación de patrones</div>
+            <div class="card-title">K-means</div>
+            <div class="card-tag">Segmentación</div>
             <p class="card-text">
-                Agrupa canciones o artistas en <strong>clusters</strong> según su comportamiento
-                de escucha, oyentes mensuales y tasa de saltos (skips).
+                Agrupa artistas o países según comportamiento de reproducción.
             </p>
             <a href="{{ url_for('vista_kmeans') }}" class="btn btn-primary">Ver clusters</a>
+        </article>
+
+        <article class="card">
+            <div class="card-title">Análisis de Sentimiento</div>
+            <div class="card-tag">Opiniones de los usuarios</div>
+            <p class="card-text">
+                Descubre si las reseñas son positivas, negativas o neutras y qué temas se repiten más.
+            </p>
+            <a href="{{ url_for('vista_sentimiento') }}" class="btn btn-primary">Ver análisis</a>
         </article>
 
         <article class="card">
             <div class="card-title">Explorar Dataset</div>
             <div class="card-tag">Spotify 2024 Global</div>
             <p class="card-text">
-                Consulta una muestra de las filas originales del dataset: país, artista,
-                género, oyentes mensuales y métricas agregadas de streaming.
+                Muestra una vista rápida del dataset original utilizado para el análisis.
             </p>
             <a href="{{ url_for('vista_dataset') }}" class="btn btn-primary">Ver datos</a>
         </article>
+
     </section>
+
 </div>
 </body>
 </html>
