@@ -1,109 +1,164 @@
 from flask import Flask, render_template
+import os
 import pandas as pd
 
-# Importar funciones de tus modelos
-from modelos.regresion import run_regression_model
+from modelos.regresion import run_regresion
 from modelos.arbol import run_arbol
 from modelos.k_means import run_kmeans
 from modelos.sentimientos import run_sentimiento
 
 app = Flask(__name__)
 
-# Rutas de los datasets
-DATA_STREAM_PATH = "data/Spotify_2024_Global_Streaming_Data.csv"
-REVIEWS_PATH = "data/spotify_reviews.csv"
+# =========================
+# RUTAS DE ARCHIVOS
+# =========================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "data", "Spotify_2024_Global_Streaming_Data.csv")
+REVIEWS_FILE = os.path.join(BASE_DIR, "data", "spotify_reviews.csv")
 
 
-# ------------------ PÁGINA PRINCIPAL ------------------ #
+# =========================
+# HELPER: VISTA DEL DATASET
+# =========================
+def load_dataset_head(n: int = 15) -> str | None:
+    """
+    Devuelve un HTML con las primeras filas del dataset principal.
+    Si hay un error, devuelve None.
+    """
+    try:
+        df = pd.read_csv(DATA_FILE, encoding="latin-1")
+        return df.head(n).to_html(
+            classes="dataset-table",
+            index=False,
+            border=0
+        )
+    except Exception:
+        return None
+
+
+# =========================
+# RUTA PRINCIPAL
+# =========================
 @app.route("/")
 def index():
     """
-    Portada del dashboard (solo texto y botones).
-    No ejecuta modelos pesados aquí.
+    Landing: sin modelo seleccionado, sólo el layout.
     """
     return render_template(
         "index.html",
         selected_model=None,
         metrics=None,
-        sentimiento=None
+        results=None,
+        sentimiento=None,
+        dataset_head=None,
     )
 
 
-# ------------------ REGRESIÓN LINEAL ------------------ #
+# =========================
+# REGRESIÓN LINEAL
+# =========================
 @app.route("/regresion")
 def vista_regresion():
     """
-    Página de regresión lineal.
+    Ejecuta el modelo de Regresión Lineal y muestra sus métricas y gráficas.
     """
-    results = run_regression_model(DATA_STREAM_PATH)
+    resultados = run_regresion(DATA_FILE)
 
     return render_template(
-        "regresion.html",
+        "index.html",
         selected_model="Regresión Lineal",
-        results=results
+        metrics=resultados,   # para R2, MSE, MAE, etc.
+        results=resultados,   # para acceder a results.images.scatter, etc.
+        sentimiento=None,
+        dataset_head=None,
     )
 
 
-# ------------------ ÁRBOL DE DECISIÓN ------------------ #
+# =========================
+# ÁRBOL DE DECISIÓN
+# =========================
 @app.route("/arbol")
 def vista_arbol():
     """
-    Página de árbol de decisión.
+    Ejecuta el Árbol de Decisión y muestra métricas y gráficas.
     """
-    metrics = run_arbol(DATA_STREAM_PATH)
+    metrics = run_arbol(DATA_FILE)
 
     return render_template(
-        "arbol.html",
+        "index.html",
         selected_model="Árbol de Decisión",
-        metrics=metrics
+        metrics=metrics,      # contiene métricas + metrics.images.*
+        results=None,
+        sentimiento=None,
+        dataset_head=None,
     )
 
 
-# ------------------ K-MEANS CLUSTERING ------------------ #
+# =========================
+# K-MEANS
+# =========================
 @app.route("/kmeans")
 def vista_kmeans():
     """
-    Página de clustering K-means.
+    Ejecuta K-means y muestra los clusters (PCA + tamaños).
     """
-    metrics = run_kmeans(DATA_STREAM_PATH)
+    metrics = run_kmeans(DATA_FILE)
 
-    return render_template(
-        "kmeans.html",
-        selected_model="K-means",
-        metrics=metrics
-    )
-
-
-# ------------------ ANÁLISIS DE SENTIMIENTO ------------------ #
-@app.route("/sentimiento")
-def vista_sentimiento():
-    csv_path = os.path.join("data", "spotify_reviews.csv")
-    sentimiento = run_sentimiento(csv_path)
     return render_template(
         "index.html",
-        selected_model="Sentimiento",
-        sentimiento=sentimiento,
-        metrics=None,
+        selected_model="K-means",
+        metrics=metrics,      # contiene n_clusters, inercia, metrics.images.*
         results=None,
+        sentimiento=None,
+        dataset_head=None,
     )
 
-# ------------------ VISTA DEL DATASET ------------------ #
+
+# =========================
+# ANÁLISIS DE SENTIMIENTO
+# =========================
+@app.route("/sentimiento")
+def vista_sentimiento():
+    """
+    Ejecuta el análisis de sentimiento usando spotify_reviews.csv
+    y muestra las gráficas generadas.
+    """
+    sentimiento = run_sentimiento(REVIEWS_FILE)
+
+    return render_template(
+        "index.html",
+        selected_model="Análisis de Sentimiento",
+        metrics=None,
+        results=None,
+        sentimiento=sentimiento,  # dict con ok, images.*, error si falla
+        dataset_head=None,
+    )
+
+
+# =========================
+# VISTA DEL DATASET
+# =========================
 @app.route("/dataset")
 def vista_dataset():
     """
     Muestra una tabla con una muestra del dataset principal.
     """
-    df = pd.read_csv(DATA_STREAM_PATH, encoding="latin-1")
-    sample = df.head(100).to_dict(orient="records")
-    columns = df.columns.tolist()
+    head_html = load_dataset_head(20)
 
     return render_template(
-        "dataset.html",
-        columns=columns,
-        rows=sample
+        "index.html",
+        selected_model="Dataset",
+        metrics=None,
+        results=None,
+        sentimiento=None,
+        dataset_head=head_html,
     )
 
 
-# ------------------ MAIN ------------------ #
+# =========================
+# MAIN
+# =========================
 if __name__ == "__main__":
+    # Ejecutar siempre desde la carpeta del proyecto:
+    # (venv) PS C:\Users\...\Proyecto_Final> python app.py
     app.run(debug=True)
