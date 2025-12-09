@@ -4,6 +4,55 @@ import re
 from collections import Counter
 import nltk
 
+# === CONFIGURACIÓN DEL DATASET SPOTIFY (IGUAL A LOS NOTEBOOKS) ===
+RUTA_DATA_SPOTIFY = "Spotify_2024_Global_Streaming_Data.csv"
+
+NUMERIC_BASE = [
+    "Release Year",
+    "Monthly Listeners (Millions)",
+    "Total Streams (Millions)",
+    "Total Hours Streamed (Millions)",
+    "Avg Stream Duration (Min)",
+    "Streams Last 30 Days (Millions)",
+    "Skip Rate (%)",
+]
+
+TARGET_COL = "Total Streams (Millions)"  # variable objetivo
+
+
+def cargar_spotify_limpio():
+    """
+    Replica la preparación de datos de tus notebooks:
+    - lee el CSV
+    - elimina NaN
+    - crea Streams per Listener, Recent Streams Ratio, Hours per Listener
+    - devuelve df_clean, numeric_cols, feature_cols
+    """
+    df = pd.read_csv(RUTA_DATA_SPOTIFY)
+    df_clean = df.copy().dropna()
+
+    # Nuevas variables de negocio (igual que en tus notebooks)
+    df_clean["Streams per Listener"] = (
+        df_clean["Total Streams (Millions)"] / df_clean["Monthly Listeners (Millions)"]
+    )
+    df_clean["Recent Streams Ratio"] = (
+        df_clean["Streams Last 30 Days (Millions)"]
+        / df_clean["Total Streams (Millions)"]
+    )
+    df_clean["Hours per Listener"] = (
+        df_clean["Total Hours Streamed (Millions)"]
+        / df_clean["Monthly Listeners (Millions)"]
+    )
+
+    numeric_cols = NUMERIC_BASE + [
+        "Streams per Listener",
+        "Recent Streams Ratio",
+        "Hours per Listener",
+    ]
+    feature_cols = [c for c in numeric_cols if c != TARGET_COL]
+
+    return df_clean, numeric_cols, feature_cols
+
 # CSV principal de Spotify (tu archivo actual)
 RUTA_DATA_SPOTIFY = "data/Spotify_2024_Global_Streaming_Data.csv"
 
