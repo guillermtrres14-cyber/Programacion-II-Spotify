@@ -3,7 +3,7 @@ import pandas as pd
 from flask import Flask, render_template
 
 # Importar funciones de los modelos
-from modelos.regresion import run_regresion
+from modelos.regresion import run
 from modelos.arbol import run_arbol
 from modelos.k_means import run_kmeans
 from modelos.sentimientos import run_sentimiento
