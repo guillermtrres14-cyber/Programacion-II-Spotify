@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Spotify ML Dashboard{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">ML</div>
+            <div class="sidebar-title">Spotify<br><span>ML Dashboard</span></div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <a href="{{ url_for('index') }}" class="sidebar-link">
+                <span class="icon">🏠</span><span class="text">Inicio</span>
+            </a>
+            <a href="{{ url_for('vista_regresion') }}" class="sidebar-link">
+                <span class="icon">📈</span><span class="text">Regresión Lineal</span>
+            </a>
+            <a href="{{ url_for('vista_arbol') }}" class="sidebar-link">
+                <span class="icon">🌳</span><span class="text">Árbol de Decisión</span>
+            </a>
+            <a href="{{ url_for('vista_kmeans') }}" class="sidebar-link">
+                <span class="icon">🧩</span><span class="text">K-means</span>
+            </a>
+            <a href="{{ url_for('vista_sentimiento') }}" class="sidebar-link">
+                <span class="icon">💬</span><span class="text">Sentimiento</span>
+            </a>
+            <a href="{{ url_for('vista_dataset') }}" class="sidebar-link">
+                <span class="icon">📊</span><span class="text">Dataset</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span>Proyecto 2024</span>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <button id="btn-toggle" class="burger" aria-label="Alternar menú">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="topbar-title">
+                {% block top_title %}Spotify ML Dashboard{% endblock %}
+            </div>
+
+            <div class="topbar-right">
+                <span class="pill">Spotify 2024 · ML</span>
+            </div>
+        </header>
+
+        <!-- CONTENIDO -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const btn = document.getElementById('btn-toggle');
+    btn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+    });
+</script>
+</body>
+</html>
