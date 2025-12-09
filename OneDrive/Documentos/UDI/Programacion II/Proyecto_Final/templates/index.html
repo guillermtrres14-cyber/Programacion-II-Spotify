@@ -26,8 +26,10 @@
         </nav>
     </header>
 
+    {# Flags para saber qué modelo está activo #}
     {% set hay_regresion = results is defined and results and results.ok %}
     {% set hay_arbol = metrics is defined and metrics and metrics.ok and selected_model == "Árbol de Decisión" %}
+    {% set hay_kmeans = metrics is defined and metrics and metrics.ok and selected_model == "K-means" %}
 
     <!-- HERO -->
     <section class="hero">
@@ -67,6 +69,10 @@
                     Modelo actual: <strong>Árbol de Decisión</strong> ·
                     Target: <strong>{{ metrics.columna_objetivo }}</strong> ·
                     R²: <strong>{{ metrics.R2 }}</strong>
+                {% elif hay_kmeans %}
+                    Modelo actual: <strong>K-means</strong> ·
+                    Clusters: <strong>{{ metrics.n_clusters }}</strong> ·
+                    Inercia: <strong>{{ metrics.inercia }}</strong>
                 {% else %}
                     Selecciona uno de los modelos para ver sus métricas en tiempo real.
                 {% endif %}
@@ -82,6 +88,8 @@
                             Resultados – Regresión Lineal
                         {% elif hay_arbol %}
                             Resultados – Árbol de Decisión
+                        {% elif hay_kmeans %}
+                            Resultados – K-means
                         {% else %}
                             Resultados del modelo
                         {% endif %}
@@ -90,6 +98,8 @@
                         {% if hay_regresion %}
                             Predicción de Total Streams (Millions)
                         {% elif hay_arbol %}
+                            {{ metrics.tipo }}
+                        {% elif hay_kmeans %}
                             {{ metrics.tipo }}
                         {% else %}
                             Aún no se han podido calcular métricas.
@@ -159,10 +169,28 @@
                     sobre variables numéricas del dataset de Spotify 2024.
                 </div>
 
+            {% elif hay_kmeans %}
+                <div class="metrics-grid">
+                    <div>
+                        <div class="metric-label">Clusters</div>
+                        <div class="metric-value">{{ metrics.n_clusters }}</div>
+                    </div>
+                    <div>
+                        <div class="metric-label">Inercia</div>
+                        <div class="metric-value">{{ metrics.inercia }}</div>
+                    </div>
+                </div>
+
+                <div class="panel-footer">
+                    Segmentación de países/artistas en
+                    <span>{{ metrics.n_clusters }}</span> grupos utilizando K-means
+                    sobre métricas clave de streaming.
+                </div>
+
             {% else %}
                 <div class="panel-footer">
                     Ejecuta alguno de los modelos para visualizar aquí sus métricas principales
-                    (R², MSE, MAE, RMSE, etc.) y entender qué variables explican mejor los streams.
+                    (R², MSE, MAE, RMSE, inercia, etc.).
                     {% if results is defined and results and not results.ok %}
                         <br><br>
                         <span style="color:#e74c3c; font-size: 0.9rem;">
@@ -257,6 +285,46 @@
                     <img
                         src="{{ url_for('static', filename=metrics.images.importancia) }}"
                         alt="Árbol de decisión: Importancia de variables"
+                        class="chart-image"
+                    >
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- VISUALIZACIONES K-MEANS -->
+    {% if hay_kmeans %}
+    <section class="charts-section">
+        <h2 class="section-title">Visualizaciones de K-means</h2>
+        <p class="section-subtitle">
+            Clusters de países o artistas según sus métricas de escucha en Spotify 2024.
+        </p>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Clusters en espacio PCA</h3>
+                <p class="chart-description">
+                    Representación en 2D (PCA) coloreada por cluster asignado por K-means.
+                </p>
+                {% if metrics.images.clusters_pca %}
+                    <img
+                        src="{{ url_for('static', filename=metrics.images.clusters_pca) }}"
+                        alt="Clusters K-means en PCA"
+                        class="chart-image"
+                    >
+                {% endif %}
+            </div>
+
+            <div class="chart-card">
+                <h3>Tamaño de los clusters</h3>
+                <p class="chart-description">
+                    Número de observaciones en cada grupo encontrado por K-means.
+                </p>
+                {% if metrics.images['tamaño_clusters'] %}
+                    <img
+                        src="{{ url_for('static', filename=metrics.images['tamaño_clusters']) }}"
+                        alt="Tamaño de los clusters K-means"
                         class="chart-image"
                     >
                 {% endif %}
